@@ -1,3 +1,19 @@
+import FormCatatanAdd from "../components/forms/FormCatatanAdd";
+
 export default function DashboardPage() {
-  return <div>Dashboard</div>;
+  const handleSuccess = () => {
+    console.log("Catatan berhasil ditambahkan!");
+    // Redirect or refresh data
+  };
+
+  const handleCancel = () => {
+    console.log("Cancelled");
+    // Close modal or navigate back
+  };
+  return (
+    <div>
+      Dashboard
+      <FormCatatanAdd onSuccess={handleSuccess} onCancel={handleCancel} />
+    </div>
+  );
 }
