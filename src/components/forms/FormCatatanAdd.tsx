@@ -1,5 +1,3 @@
-// Refactored FormCatatanAdd.tsx with Toast and Field-level validation
-
 import {
   AlignLeft,
   Archive,
@@ -14,101 +12,14 @@ import {
   Tags,
   X,
   Check,
-  CheckCircle,
-  AlertTriangle,
-  Info,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { FolderOption, KategoriOption } from "../../types/catatan.types";
 import { useCatatan } from "../../hooks/useCatatan";
 import { useFormCatatan } from "../../hooks/useFormCatatan";
-
-// Toast Alert Component
-interface ToastAlertProps {
-  type: 'success' | 'error' | 'info';
-  message: string;
-  onClose: () => void;
-  duration?: number;
-}
-
-const ToastAlert: React.FC<ToastAlertProps> = ({ 
-  type, 
-  message, 
-  onClose, 
-  duration = 4000 
-}) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    setIsAnimating(true);
-    
-    const timer = setTimeout(() => {
-      setIsAnimating(false);
-      setTimeout(() => {
-        setIsVisible(false);
-        onClose();
-      }, 300); // Animation duration
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
-
-  if (!isVisible) return null;
-
-  const icons = {
-    success: <CheckCircle className="h-5 w-5" />,
-    error: <AlertTriangle className="h-5 w-5" />,
-    info: <Info className="h-5 w-5" />
-  };
-
-  const colors = {
-    success: 'bg-success text-success-content',
-    error: 'bg-error text-error-content',
-    info: 'bg-info text-info-content'
-  };
-
-  return (
-    <div className={`fixed top-4 right-4 z-50 transition-all duration-300 ${
-      isAnimating ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-    }`}>
-      <div className={`alert shadow-lg ${colors[type]} min-w-80 max-w-96`}>
-        {icons[type]}
-        <span className="flex-1">{message}</span>
-        <button 
-          onClick={() => {
-            setIsAnimating(false);
-            setTimeout(() => {
-              setIsVisible(false);
-              onClose();
-            }, 300);
-          }}
-          className="btn btn-ghost btn-sm btn-circle"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Field Error Component
-interface FieldErrorProps {
-  error?: string;
-}
-
-const FieldError: React.FC<FieldErrorProps> = ({ error }) => {
-  if (!error) return null;
-  
-  return (
-    <label className="label">
-      <span className="label-text-alt text-error flex items-center gap-1">
-        <AlertTriangle className="h-3 w-3" />
-        {error}
-      </span>
-    </label>
-  );
-};
+import { useDynamicOptions } from "../../hooks/useDynamicOptions";
+import FieldError from "../FieldError";
+import ToastAlert from "../ToastAlert";
 
 interface FormCatatanAddProps {
   onSuccess?: () => void;
@@ -121,20 +32,20 @@ interface FormCatatanAddProps {
 const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
   onSuccess,
   onCancel,
-  kategoris: initialKategoris = [],
-  folders: initialFolders = [],
+  kategoris: initialKategorisFromProps = [],
+  folders: initialFoldersFromProps = [],
   className = "",
 }) => {
-  const { 
-    createCatatan, 
-    isLoading, 
-    error, 
-    success, 
+  const {
+    createCatatan,
+    isLoading,
+    error,
+    success,
     clearMessages,
     fetchKategoris,
-    fetchFolders 
+    fetchFolders,
   } = useCatatan();
-  
+
   const {
     formData,
     errors,
@@ -145,257 +56,226 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
     saveDraft,
     loadDraft,
     clearDraft,
+    getSubmissionData,
+    DEFAULT_KATEGORI_NAMA, // Import default values from useFormCatatan
+    DEFAULT_FOLDER_NAMA, // Import default values from useFormCatatan
   } = useFormCatatan();
 
-  // State untuk kategori dan folder dinamis
-  const [kategoris, setKategoris] = useState<KategoriOption[]>(initialKategoris);
-  const [folders, setFolders] = useState<FolderOption[]>(initialFolders);
+  // Memoize initial arrays to prevent re-renders in useDynamicOptions's useEffect
+  const memoizedInitialKategoris = useMemo(
+    () => initialKategorisFromProps,
+    [initialKategorisFromProps],
+  );
+  const memoizedInitialFolders = useMemo(
+    () => initialFoldersFromProps,
+    [initialFoldersFromProps],
+  );
 
-  // State untuk melacak apakah data sudah dimuat
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [showAddKategori, setShowAddKategori] = useState(false);
-  const [showAddFolder, setShowAddFolder] = useState(false);
-  const [newKategoriName, setNewKategoriName] = useState("");
-  const [newFolderName, setNewFolderName] = useState("");
+  const {
+    kategoris,
+    folders,
+    showAddKategori,
+    setShowAddKategori,
+    newKategoriName,
+    setNewKategoriName,
+    showAddFolder,
+    setShowAddFolder,
+    newFolderName,
+    setNewFolderName,
+    addKategoriLocally,
+    addFolderLocally,
+    refreshOptions,
+  } = useDynamicOptions({
+    initialKategoris: memoizedInitialKategoris,
+    initialFolders: memoizedInitialFolders,
+    fetchKategoris,
+    fetchFolders,
+  });
 
-  // Toast state
   const [toastAlert, setToastAlert] = useState<{
     show: boolean;
-    type: 'success' | 'error' | 'info';
+    type: "success" | "error" | "info";
     message: string;
   }>({
     show: false,
-    type: 'success',
-    message: ''
+    type: "success",
+    message: "",
   });
 
-  // Draft message state (untuk pesan draft tetap menggunakan toast)
   const [draftToast, setDraftToast] = useState<{
     show: boolean;
-    type: 'success' | 'error';
+    type: "success" | "error";
     message: string;
   }>({
     show: false,
-    type: 'success',
-    message: ''
+    type: "success",
+    message: "",
   });
 
-  // Load initial data from Supabase hanya sekali saat komponen pertama kali dimuat
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (isDataLoaded) return; // Skip jika data sudah dimuat
-
-      try {
-        const [dbKategoris, dbFolders] = await Promise.all([
-          fetchKategoris(),
-          fetchFolders()
-        ]);
-
-        // Combine initial data with database data
-        const allKategoris = [
-          ...initialKategoris,
-          ...dbKategoris.filter(dbItem => 
-            !initialKategoris.some(initItem => initItem.name === dbItem.name)
-          )
-        ];
-
-        const allFolders = [
-          ...initialFolders,
-          ...dbFolders.filter(dbItem => 
-            !initialFolders.some(initItem => initItem.name === dbItem.name)
-          )
-        ];
-
-        setKategoris(allKategoris);
-        setFolders(allFolders);
-        setIsDataLoaded(true);
-      } catch (err) {
-        console.error('Error loading initial data:', err);
-        // Fallback to initial data if database fetch fails
-        setKategoris(initialKategoris);
-        setFolders(initialFolders);
-        setIsDataLoaded(true);
-      }
-    };
-
-    loadInitialData();
-  }, []); // Hapus dependencies yang menyebabkan re-render
-
-  // Load draft terpisah
+  // Load draft saat komponen dimuat
   useEffect(() => {
     loadDraft();
   }, [loadDraft]);
 
-  // Handle success message dengan toast
+  // Handle success message
   useEffect(() => {
     if (success) {
       setToastAlert({
         show: true,
-        type: 'success',
-        message: success
+        type: "success",
+        message: success,
       });
-      
-      // Clear success setelah toast ditampilkan
+
       const timer = setTimeout(() => {
         clearMessages();
         if (onSuccess) {
           onSuccess();
         }
       }, 4000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [success, clearMessages, onSuccess]);
 
-  // Handle error message dengan toast
+  // Handle error message
   useEffect(() => {
     if (error) {
       setToastAlert({
         show: true,
-        type: 'error',
-        message: error
+        type: "error",
+        message: error,
       });
-      
-      // Clear error setelah toast ditampilkan
+
       const timer = setTimeout(() => {
         clearMessages();
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [error, clearMessages]);
 
-  // Handler untuk menambah kategori baru
-  const handleAddKategori = () => {
+  const handleAddKategori = useCallback(() => {
     if (newKategoriName.trim()) {
-      const newId = `new_${Date.now()}`; // Temporary ID for new categories
-      const newKategori = { id: newId, name: newKategoriName.trim() };
-      setKategoris([...kategoris, newKategori]);
+      const newKategori = addKategoriLocally(newKategoriName);
+      if (newKategori) {
+        updateField("kategori_nama", newKategori.name);
+      }
       setNewKategoriName("");
       setShowAddKategori(false);
-      // Automatically select the new category
-      updateField("kategori_id", newId);
     }
-  };
+  }, [newKategoriName, addKategoriLocally, updateField]);
 
-  // Handler untuk menambah folder baru
-  const handleAddFolder = () => {
+  const handleAddFolder = useCallback(() => {
     if (newFolderName.trim()) {
-      const newId = `new_${Date.now()}`; // Temporary ID for new folders
-      const newFolder = { id: newId, name: newFolderName.trim() };
-      setFolders([...folders, newFolder]);
+      const newFolder = addFolderLocally(newFolderName);
+      if (newFolder) {
+        updateField("folder_nama", newFolder.name);
+      }
       setNewFolderName("");
       setShowAddFolder(false);
-      // Automatically select the new folder
-      updateField("folder_id", newId);
     }
-  };
+  }, [newFolderName, addFolderLocally, updateField]);
 
-  // Handler untuk cancel add kategori/folder
-  const handleCancelAddKategori = () => {
+  const handleCancelAddKategori = useCallback(() => {
     setShowAddKategori(false);
     setNewKategoriName("");
-  };
+  }, []);
 
-  const handleCancelAddFolder = () => {
+  const handleCancelAddFolder = useCallback(() => {
     setShowAddFolder(false);
     setNewFolderName("");
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    // Clear any previous messages
-    clearMessages();
-    setToastAlert({ show: false, type: 'success', message: '' });
+      clearMessages();
+      setToastAlert({ show: false, type: "success", message: "" });
 
-    if (!validateForm()) {
-      // Validasi akan menampilkan error di masing-masing field
-      // Tidak perlu menampilkan pesan umum
-      return;
-    }
-
-    try {
-      // Find selected kategori and folder objects
-      const selectedKategori = kategoris.find(k => k.id === formData.kategori_id) || null;
-      const selectedFolder = folders.find(f => f.id === formData.folder_id) || null;
-
-      const result = await createCatatan(
-        formData,
-        selectedKategori,
-        selectedFolder,
-        kategoris,
-        folders
-      );
-
-      if (result.success) {
-        clearDraft();
-        resetForm();
-        
-        // Refresh kategoris and folders list if new ones were created
-        if (result.newKategoriId || result.newFolderId) {
-          try {
-            const [updatedKategoris, updatedFolders] = await Promise.all([
-              fetchKategoris(),
-              fetchFolders()
-            ]);
-            
-            setKategoris([...initialKategoris, ...updatedKategoris]);
-            setFolders([...initialFolders, ...updatedFolders]);
-          } catch (err) {
-            console.error('Error refreshing categories/folders:', err);
-          }
-        }
+      if (!validateForm()) {
+        return;
       }
-    } catch (err) {
-      console.error('Unexpected error in form submission:', err);
-      setToastAlert({
-        show: true,
-        type: 'error',
-        message: 'Terjadi kesalahan yang tidak terduga'
-      });
-    }
-  };
 
-  const handleSaveDraft = () => {
+      try {
+        const submissionData = getSubmissionData();
+
+        // createCatatan now handles ensuring defaults exist in DB
+        // if they are selected as the value.
+        const result = await createCatatan(submissionData);
+
+        if (result.success) {
+          clearDraft();
+          resetForm();
+          // Refresh options after successful creation to get updated data from DB
+          // This is important if a new category/folder was created (including default ones)
+          await refreshOptions();
+        }
+      } catch (err) {
+        console.error("Error in form submission:", err);
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan yang tidak terduga";
+        setToastAlert({
+          show: true,
+          type: "error",
+          message: errorMessage,
+        });
+      }
+    },
+    [
+      clearMessages,
+      validateForm,
+      getSubmissionData,
+      createCatatan,
+      clearDraft,
+      resetForm,
+      refreshOptions,
+    ],
+  );
+
+  const handleSaveDraft = useCallback(() => {
     try {
       const saved = saveDraft();
       if (saved) {
         setDraftToast({
           show: true,
-          type: 'success',
-          message: "Draft berhasil disimpan!"
+          type: "success",
+          message: "Draft berhasil disimpan!",
         });
       } else {
         setDraftToast({
           show: true,
-          type: 'error',
-          message: "Tidak ada perubahan untuk disimpan"
+          type: "error",
+          message: "Tidak ada perubahan untuk disimpan",
         });
       }
     } catch (err) {
-      console.error('Error saving draft:', err);
+      console.error("Error saving draft:", err);
       setDraftToast({
         show: true,
-        type: 'error',
-        message: 'Gagal menyimpan draft'
+        type: "error",
+        message: "Gagal menyimpan draft",
       });
     }
-  };
+  }, [saveDraft]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetForm();
     clearDraft();
     clearMessages();
-  };
+    setToastAlert({ show: false, type: "success", message: "" });
+    setDraftToast({ show: false, type: "success", message: "" });
+  }, [resetForm, clearDraft, clearMessages]);
 
-  const closeToast = () => {
-    setToastAlert({ show: false, type: 'success', message: '' });
-  };
+  const closeToast = useCallback(() => {
+    setToastAlert({ show: false, type: "success", message: "" });
+  }, []);
 
-  const closeDraftToast = () => {
-    setDraftToast({ show: false, type: 'success', message: '' });
-  };
+  const closeDraftToast = useCallback(() => {
+    setDraftToast({ show: false, type: "success", message: "" });
+  }, []);
 
   return (
     <>
@@ -432,6 +312,7 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                     errors.judul_catatan ? "input-error" : ""
                   }`}
                   disabled={isLoading}
+                  aria-invalid={errors.judul_catatan ? "true" : "false"}
                 />
                 <FieldError error={errors.judul_catatan} />
               </div>
@@ -447,20 +328,17 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                 <textarea
                   value={formData.isi_catatan}
                   onChange={(e) => updateField("isi_catatan", e.target.value)}
-                  className={`textarea textarea-bordered h-96 w-full focus:textarea-primary resize-y scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent hover:scrollbar-thumb-base-content/20 scrollbar-thumb-rounded-full ${
+                  className={`textarea textarea-bordered h-96 w-full focus:textarea-primary resize-y ${
                     errors.isi_catatan ? "textarea-error" : ""
                   }`}
                   placeholder="Tulis isi catatan Anda di sini..."
                   disabled={isLoading}
-                  style={{
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "hsl(var(--bc) / 0.2) transparent",
-                  }}
+                  aria-invalid={errors.isi_catatan ? "true" : "false"}
                 />
                 <FieldError error={errors.isi_catatan} />
               </div>
 
-              {/* Row untuk Kategori dan Folder */}
+              {/* Kategori dan Folder */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Kategori */}
                 <div className="form-control">
@@ -474,21 +352,27 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                   {!showAddKategori ? (
                     <div className="flex gap-2">
                       <select
-                        value={formData.kategori_id}
+                        value={formData.kategori_nama}
                         onChange={(e) =>
-                          updateField("kategori_id", e.target.value)
+                          updateField("kategori_nama", e.target.value)
                         }
                         className={`select select-bordered w-full focus:select-primary ${
-                          errors.kategori_id ? "select-error" : ""
+                          errors.kategori_nama ? "select-error" : ""
                         }`}
                         disabled={isLoading}
                       >
-                        <option value="">Pilih Kategori</option>
-                        {kategoris.map((kategori) => (
-                          <option key={kategori.id} value={kategori.id}>
-                            {kategori.name}
-                          </option>
-                        ))}
+                        {/* Always show default option first */}
+                        <option value={DEFAULT_KATEGORI_NAMA}>
+                          {DEFAULT_KATEGORI_NAMA}
+                        </option>
+                        {/* Filter out default if it's already explicitly in categories list */}
+                        {kategoris
+                          .filter((k) => k.name !== DEFAULT_KATEGORI_NAMA)
+                          .map((kategori) => (
+                            <option key={kategori.id} value={kategori.name}>
+                              {kategori.name}
+                            </option>
+                          ))}
                       </select>
                       <button
                         type="button"
@@ -539,7 +423,7 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                       </button>
                     </div>
                   )}
-                  <FieldError error={errors.kategori_id} />
+                  <FieldError error={errors.kategori_nama} />
                 </div>
 
                 {/* Folder */}
@@ -554,21 +438,27 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                   {!showAddFolder ? (
                     <div className="flex gap-2">
                       <select
-                        value={formData.folder_id}
+                        value={formData.folder_nama}
                         onChange={(e) =>
-                          updateField("folder_id", e.target.value)
+                          updateField("folder_nama", e.target.value)
                         }
                         className={`select select-bordered w-full focus:select-primary ${
-                          errors.folder_id ? "select-error" : ""
+                          errors.folder_nama ? "select-error" : ""
                         }`}
                         disabled={isLoading}
                       >
-                        <option value="">Pilih Folder</option>
-                        {folders.map((folder) => (
-                          <option key={folder.id} value={folder.id}>
-                            {folder.name}
-                          </option>
-                        ))}
+                        {/* Always show default option first */}
+                        <option value={DEFAULT_FOLDER_NAMA}>
+                          {DEFAULT_FOLDER_NAMA}
+                        </option>
+                        {/* Filter out default if it's already explicitly in folders list */}
+                        {folders
+                          .filter((f) => f.name !== DEFAULT_FOLDER_NAMA)
+                          .map((folder) => (
+                            <option key={folder.id} value={folder.name}>
+                              {folder.name}
+                            </option>
+                          ))}
                       </select>
                       <button
                         type="button"
@@ -619,13 +509,12 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                       </button>
                     </div>
                   )}
-                  <FieldError error={errors.folder_id} />
+                  <FieldError error={errors.folder_nama} />
                 </div>
               </div>
 
               {/* Checkbox Options */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Pin Catatan */}
                 <div className="form-control">
                   <label className="label cursor-pointer justify-start">
                     <input
@@ -647,7 +536,6 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
                   </div>
                 </div>
 
-                {/* Arsipkan */}
                 <div className="form-control">
                   <label className="label cursor-pointer justify-start">
                     <input
