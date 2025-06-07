@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-
 import CatatanSidebar from "./CatatanSidebar";
 import CatatanListPaginated from "./CatatanListPaginated";
 import FormCatatanAdd from "../forms/FormCatatanAdd";
 import supabase from "../../lib/supabase";
+import { Menu, X } from "lucide-react"; // Import icons for menu and close
 
 interface Category {
   id: string;
@@ -24,6 +24,7 @@ export default function CatatanMainLayout() {
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State baru untuk mengontrol sidebar/drawer
 
   // Fetch categories from Supabase
   const fetchCategories = async () => {
@@ -108,6 +109,7 @@ export default function CatatanMainLayout() {
 
   const handleAddNew = () => {
     setShowAddForm(true);
+    setIsSidebarOpen(false); // Tutup sidebar setelah aksi di mobile
   };
 
   const handleFormSuccess = async () => {
@@ -122,10 +124,23 @@ export default function CatatanMainLayout() {
     setShowAddForm(false);
   };
 
+  // Fungsi untuk menangani pemilihan kategori dan menutup sidebar di mobile
+  const handleCategorySelectAndCloseSidebar = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    setIsSidebarOpen(false); // Tutup sidebar setelah memilih kategori
+  };
+
+  // Fungsi untuk menangani pemilihan folder dan menutup sidebar di mobile
+  const handleFolderSelectAndCloseSidebar = (folderId: string | null) => {
+    setSelectedFolder(folderId);
+    setIsSidebarOpen(false); // Tutup sidebar setelah memilih folder
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen bg-base-100">
-        <div className="w-64 bg-base-200 p-4 min-h-screen">
+        {/* Placeholder untuk sidebar di desktop */}
+        <div className="hidden md:block w-64 bg-base-200 p-4 min-h-screen">
           <div className="animate-pulse space-y-4">
             <div className="h-10 bg-base-300 rounded"></div>
             <div className="space-y-2">
@@ -149,32 +164,42 @@ export default function CatatanMainLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-base-100">
-      {/* Sidebar */}
-      <CatatanSidebar
-        categories={categories}
-        folders={folders}
-        onAddNew={handleAddNew}
-        onCategorySelect={setSelectedCategory}
-        onFolderSelect={setSelectedFolder}
-        selectedCategory={selectedCategory}
-        selectedFolder={selectedFolder}
-      />
+    <div className="flex flex-col md:flex-row min-h-screen bg-base-100">
+      {/* Sidebar untuk Desktop */}
+      <div className="hidden md:block">
+        <CatatanSidebar
+          categories={categories}
+          folders={folders}
+          onAddNew={handleAddNew}
+          onCategorySelect={setSelectedCategory}
+          onFolderSelect={setSelectedFolder}
+          selectedCategory={selectedCategory}
+          selectedFolder={selectedFolder}
+        />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Catatan</h1>
-            <p className="text-base-content/60">
-              Kelola semua catatan Anda dengan mudah
-            </p>
+          {/* Header untuk Mobile/Tablet */}
+          <div className="flex justify-between items-center mb-6 md:mb-0">
+            <h1 className="text-2xl md:text-3xl font-bold">Catatan</h1>
+            <button
+              className="btn btn-ghost md:hidden" // Hanya tampil di mobile/tablet
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
+
+          {/* Deskripsi di Desktop */}
+          <p className="hidden md:block text-base-content/60 mb-6">
+            Kelola semua catatan Anda dengan mudah
+          </p>
 
           {/* Filter Badge */}
           {(selectedCategory || selectedFolder) && (
-            <div className="mb-4 flex gap-2">
+            <div className="mb-4 flex flex-wrap gap-2">
               {selectedCategory && (
                 <div className="badge badge-primary gap-2">
                   Kategori:{" "}
@@ -208,6 +233,38 @@ export default function CatatanMainLayout() {
           />
         </div>
       </div>
+
+      {/* Sidebar sebagai Drawer untuk Mobile/Tablet */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-white/10 to-black/20 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
+
+          {/* Sidebar Content */}
+          <div className="relative max-w-xs bg-base-200 h-full p-4 transform transition-transform duration-300 ease-in-out translate-x-0">
+            <div className="flex justify-end mb-4">
+              <button
+                className="btn btn-ghost"
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <CatatanSidebar
+              categories={categories}
+              folders={folders}
+              onAddNew={handleAddNew}
+              onCategorySelect={handleCategorySelectAndCloseSidebar} // Gunakan handler baru
+              onFolderSelect={handleFolderSelectAndCloseSidebar} // Gunakan handler baru
+              selectedCategory={selectedCategory}
+              selectedFolder={selectedFolder}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Add Form Modal */}
       {showAddForm && (
