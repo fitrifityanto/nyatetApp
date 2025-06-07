@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { useNavigate } from "react-router";
 import ReactMarkdown from "react-markdown";
 import {
   FileText,
@@ -9,6 +9,10 @@ import {
   Archive,
   CalendarDays,
   Clock,
+  ArrowLeft,
+  Edit,
+  Trash2,
+  ChevronRight,
 } from "lucide-react";
 import supabase from "../../lib/supabase";
 
@@ -30,6 +34,8 @@ type Catatan = {
 const CatatanDetail = ({ id }: Props) => {
   const [catatan, setCatatan] = useState<Catatan | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCatatan = async () => {
@@ -72,18 +78,103 @@ const CatatanDetail = ({ id }: Props) => {
     fetchCatatan();
   }, [id]);
 
+  const handleBack = () => {
+    navigate(-1); // Go back to previous page
+  };
+
+  const handleEdit = () => {
+    navigate(`/catatan/edit/${id}`);
+  };
+
+  const handleDelete = async () => {
+    if (!catatan) return;
+
+    try {
+      const { error } = await supabase.from("catatan").delete().eq("id", id);
+
+      if (error) {
+        console.error("Error deleting catatan:", error.message);
+        alert("Gagal menghapus catatan. Silakan coba lagi.");
+      } else {
+        alert("Catatan berhasil dihapus.");
+        navigate("/catatan"); // Navigate back to main catatan page
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Terjadi kesalahan. Silakan coba lagi.");
+    }
+    setShowDeleteModal(false);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteModal(true);
+  };
+
   if (loading) return <p className="text-center">Loading...</p>;
   if (!catatan)
     return <p className="text-center text-error">Catatan not found.</p>;
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto w-full">
-      {/* Header */}
+      {/* Breadcrumbs and Back Button */}
+      <nav className="space-y-2">
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Kembali ke Catatan
+        </button>
+
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <span
+            className="hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer"
+            onClick={() => navigate("/catatan")}
+          >
+            Catatan
+          </span>
+          {catatan.kategori_catatan?.nama && (
+            <>
+              <ChevronRight className="w-3 h-3" />
+              <span>{catatan.kategori_catatan.nama}</span>
+            </>
+          )}
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-gray-700 dark:text-gray-300 font-medium">
+            {catatan.judul_catatan}
+          </span>
+        </div>
+      </nav>
+
+      {/* Header with Title */}
       <header className="space-y-4">
+        {/* Title */}
         <h1 className="text-3xl font-bold flex items-start gap-3 leading-tight">
           <FileText className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
           <span className="break-words">{catatan.judul_catatan}</span>
         </h1>
+
+        {/* Action Buttons - Desktop only */}
+        <div className="hidden lg:flex items-center gap-2">
+          <button
+            onClick={handleEdit}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            title="Edit Catatan"
+          >
+            <Edit className="w-4 h-4" />
+            Edit
+          </button>
+          <button
+            onClick={confirmDelete}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+            title="Hapus Catatan"
+          >
+            <Trash2 className="w-4 h-4" />
+            Hapus
+          </button>
+        </div>
 
         {/* Metadata info */}
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -318,6 +409,53 @@ const CatatanDetail = ({ id }: Props) => {
           </div>
         </div>
       </footer>
+
+      {/* Floating Action Buttons - Mobile/Tablet only */}
+      <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+        <button
+          onClick={handleEdit}
+          className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          title="Edit Catatan"
+        >
+          <Edit className="w-5 h-5" />
+        </button>
+        <button
+          onClick={confirmDelete}
+          className="w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          title="Hapus Catatan"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-gradient-to-br from-white/10 to-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              Konfirmasi Penghapusan
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Apakah Anda yakin ingin menghapus catatan "{catatan.judul_catatan}
+              "? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
