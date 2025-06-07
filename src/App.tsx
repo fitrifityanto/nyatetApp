@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import CatatanPage from "./pages/CatatanPage";
 
 function App() {
   const { loading } = useAuth();
@@ -49,7 +50,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/catatan"
+          element={
+            <ProtectedRoute>
+              <CatatanPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
