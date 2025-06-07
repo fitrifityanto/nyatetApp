@@ -4,3 +4,8 @@
     nord --default,
     dracula --prefersdark;
 }
+
+.font-arabic {
+  font-family: "Amiri", "Scheherazade New", "Noto Sans Arabic", serif;
+  font-size: 1.25rem;
+}

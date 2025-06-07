@@ -8,6 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import CatatanPage from "./pages/CatatanPage";
+import CatatanDetailPage from "./pages/CatatanDetailPage";
 
 function App() {
   const { loading } = useAuth();
@@ -49,7 +51,22 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/catatan"
+          element={
+            <ProtectedRoute>
+              <CatatanPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/catatan/:id"
+          element={
+            <ProtectedRoute>
+              <CatatanDetailPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
