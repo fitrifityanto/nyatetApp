@@ -1,6 +1,6 @@
 import supabase from "../lib/supabase";
 import { useCallback, useState } from "react";
-import type { CreateCatatanData } from "../types/catatan.types";
+import type { CreateCatatanData, Catatan } from "../types/catatan.types";
 
 // Default values, dipindahkan ke sini karena logikanya akan terpusat di sini untuk DB interaction
 export const DEFAULT_KATEGORI_NAMA = "Tanpa Kategori";
@@ -102,6 +102,80 @@ export const useCatatan = () => {
     [],
   );
 
+  // Method untuk mengambil catatan berdasarkan ID
+  const getCatatanById = useCallback(async (catatanId: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data: userAuthData } = await supabase.auth.getUser();
+      const userId = userAuthData.user?.id;
+
+      if (!userId) {
+        throw new Error("User not authenticated.");
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from("catatan")
+        .select(
+          `
+          *,
+          kategori_catatan:kategori_id (
+            id,
+            nama
+          ),
+          folder_catatan:folder_id (
+            id,
+            nama
+          )
+        `,
+        )
+        .eq("id", catatanId)
+        .eq("user_id", userId)
+        .single();
+
+      if (fetchError) {
+        if (fetchError.code === "PGRST116") {
+          throw new Error(
+            "Catatan tidak ditemukan atau Anda tidak memiliki akses.",
+          );
+        }
+        throw fetchError;
+      }
+
+      if (!data) {
+        throw new Error("Catatan tidak ditemukan.");
+      }
+
+      // Transform data to match Catatan interface
+      const catatan: Catatan = {
+        ...data,
+        kategori_catatan: data.kategori_catatan
+          ? {
+              id: data.kategori_catatan.id,
+              nama: data.kategori_catatan.nama,
+            }
+          : undefined,
+        folder_catatan: data.folder_catatan
+          ? {
+              id: data.folder_catatan.id,
+              nama: data.folder_catatan.nama,
+            }
+          : undefined,
+      };
+
+      return { success: true, data: catatan, message: null };
+    } catch (err) {
+      console.error("Error fetching catatan by ID:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal mengambil data catatan";
+      setError(errorMessage);
+      return { success: false, data: null, message: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const createCatatan = useCallback(
     async (data: CreateCatatanData) => {
       setIsLoading(true);
@@ -162,6 +236,85 @@ export const useCatatan = () => {
     [ensureKategoriExists, ensureFolderExists],
   );
 
+  const updateCatatan = useCallback(
+    async (catatanId: string, data: CreateCatatanData) => {
+      setIsLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      try {
+        const { data: userAuthData } = await supabase.auth.getUser();
+        const userId = userAuthData.user?.id;
+
+        if (!userId) {
+          throw new Error("User not authenticated.");
+        }
+
+        // Verify that the catatan belongs to the current user
+        const { data: existingCatatan, error: verifyError } = await supabase
+          .from("catatan")
+          .select("user_id")
+          .eq("id", catatanId)
+          .single();
+
+        if (verifyError) {
+          throw new Error("Catatan tidak ditemukan.");
+        }
+
+        if (existingCatatan.user_id !== userId) {
+          throw new Error(
+            "Anda tidak memiliki akses untuk mengubah catatan ini.",
+          );
+        }
+
+        let kategoriId: string | null = null;
+        let folderId: string | null = null;
+
+        // Pastikan kategori ada di DB, jika tidak ada, buat.
+        if (data.kategori_nama) {
+          kategoriId = await ensureKategoriExists(data.kategori_nama, userId);
+        }
+
+        // Pastikan folder ada di DB, jika tidak ada, buat.
+        if (data.folder_nama) {
+          folderId = await ensureFolderExists(data.folder_nama, userId);
+        }
+
+        const { error: updateError } = await supabase
+          .from("catatan")
+          .update({
+            judul_catatan: data.judul_catatan,
+            isi_catatan: data.isi_catatan,
+            kategori_id: kategoriId,
+            folder_id: folderId,
+            is_archived: data.is_archived,
+            pinned: data.pinned,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", catatanId)
+          .eq("user_id", userId);
+
+        if (updateError) {
+          throw updateError;
+        }
+
+        setSuccess("Catatan berhasil diperbarui!");
+        return { success: true, error: null };
+      } catch (err) {
+        console.error("Error updating catatan:", err);
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan yang tidak diketahui saat memperbarui catatan";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [ensureKategoriExists, ensureFolderExists],
+  );
+
   // Helper function to fetch existing categories for a user
   const fetchKategoris = useCallback(async () => {
     try {
@@ -205,7 +358,9 @@ export const useCatatan = () => {
   }, []);
 
   return {
+    getCatatanById, // Tambahkan method baru ini
     createCatatan,
+    updateCatatan,
     isLoading,
     error,
     success,

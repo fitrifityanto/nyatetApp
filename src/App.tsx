@@ -10,6 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import CatatanPage from "./pages/CatatanPage";
 import CatatanDetailPage from "./pages/CatatanDetailPage";
+import CatatanEditPage from "./pages/CatatanEditPage";
 
 function App() {
   const { loading } = useAuth();
@@ -64,6 +65,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CatatanDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/catatan/edit/:id"
+          element={
+            <ProtectedRoute>
+              <CatatanEditPage />
             </ProtectedRoute>
           }
         />
