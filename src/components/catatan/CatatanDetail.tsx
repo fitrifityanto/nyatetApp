@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import supabase from "../../lib/supabase";
+import ToastAlert from "../ToastAlert";
 
 type Props = {
   id: string;
@@ -31,11 +32,30 @@ type Catatan = {
   folder_catatan?: { nama: string };
 };
 
+type ToastType = {
+  type: "success" | "error" | "info";
+  message: string;
+  show: boolean;
+};
+
 const CatatanDetail = ({ id }: Props) => {
   const [catatan, setCatatan] = useState<Catatan | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [toast, setToast] = useState<ToastType>({
+    type: "info",
+    message: "",
+    show: false,
+  });
   const navigate = useNavigate();
+
+  const showToast = (type: "success" | "error" | "info", message: string) => {
+    setToast({ type, message, show: true });
+  };
+
+  const closeToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
 
   useEffect(() => {
     const fetchCatatan = async () => {
@@ -79,7 +99,7 @@ const CatatanDetail = ({ id }: Props) => {
   }, [id]);
 
   const handleBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
 
   const handleEdit = () => {
@@ -94,14 +114,17 @@ const CatatanDetail = ({ id }: Props) => {
 
       if (error) {
         console.error("Error deleting catatan:", error.message);
-        alert("Gagal menghapus catatan. Silakan coba lagi.");
+        showToast("error", "Gagal menghapus catatan. Silakan coba lagi.");
       } else {
-        alert("Catatan berhasil dihapus.");
-        navigate("/catatan"); // Navigate back to main catatan page
+        showToast("success", "Catatan berhasil dihapus.");
+
+        setTimeout(() => {
+          navigate("/catatan");
+        }, 1500);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Terjadi kesalahan. Silakan coba lagi.");
+      showToast("error", "Terjadi kesalahan. Silakan coba lagi.");
     }
     setShowDeleteModal(false);
   };
@@ -116,9 +139,16 @@ const CatatanDetail = ({ id }: Props) => {
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto w-full">
-      {/* Breadcrumbs and Back Button */}
+      {toast.show && (
+        <ToastAlert
+          type={toast.type}
+          message={toast.message}
+          onClose={closeToast}
+          duration={4000}
+        />
+      )}
+
       <nav className="space-y-2">
-        {/* Back Button */}
         <button
           onClick={handleBack}
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
@@ -127,7 +157,6 @@ const CatatanDetail = ({ id }: Props) => {
           Kembali ke Catatan
         </button>
 
-        {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <span
             className="hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer"
@@ -148,15 +177,12 @@ const CatatanDetail = ({ id }: Props) => {
         </div>
       </nav>
 
-      {/* Header with Title */}
       <header className="space-y-4">
-        {/* Title */}
         <h1 className="text-3xl font-bold flex items-start gap-3 leading-tight">
           <FileText className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
           <span className="break-words">{catatan.judul_catatan}</span>
         </h1>
 
-        {/* Action Buttons - Desktop only */}
         <div className="hidden lg:flex items-center gap-2">
           <button
             onClick={handleEdit}
@@ -176,7 +202,6 @@ const CatatanDetail = ({ id }: Props) => {
           </button>
         </div>
 
-        {/* Metadata info */}
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-1">
             <CalendarDays className="w-4 h-4" />
@@ -209,11 +234,9 @@ const CatatanDetail = ({ id }: Props) => {
         </div>
       </header>
 
-      {/* Content */}
       <article className="prose prose-lg dark:prose-invert max-w-none">
         <ReactMarkdown
           components={{
-            // Custom styling untuk elemen markdown
             p: ({ children }) => {
               // Deteksi apakah ada teks Arab
               const textContent =
@@ -229,7 +252,6 @@ const CatatanDetail = ({ id }: Props) => {
               const hasLatin = /[A-Za-z]/.test(textContent);
 
               if (hasArabic && !hasLatin) {
-                // Pure Arabic text
                 return (
                   <p
                     className="font-arabic mb-4 leading-relaxed text-gray-800 dark:text-gray-200 text-right"
@@ -239,7 +261,6 @@ const CatatanDetail = ({ id }: Props) => {
                   </p>
                 );
               } else if (hasArabic && hasLatin) {
-                // Mixed text
                 return (
                   <p
                     className="mb-4 leading-relaxed text-gray-800 dark:text-gray-200 text-left"
@@ -254,7 +275,6 @@ const CatatanDetail = ({ id }: Props) => {
                   </p>
                 );
               } else {
-                // Regular text
                 return (
                   <p className="mb-4 leading-relaxed text-gray-800 dark:text-gray-200">
                     {children}
@@ -392,7 +412,6 @@ const CatatanDetail = ({ id }: Props) => {
         </ReactMarkdown>
       </article>
 
-      {/* Footer metadata */}
       <footer className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-8">
         <div className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
           <div className="flex items-center gap-2">
@@ -428,7 +447,6 @@ const CatatanDetail = ({ id }: Props) => {
         </button>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-gradient-to-br from-white/10 to-black/20 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
