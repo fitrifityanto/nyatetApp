@@ -99,7 +99,7 @@ const CatatanDetail = ({ id }: Props) => {
   }, [id]);
 
   const handleBack = () => {
-    navigate(-1);
+    navigate("/catatan");
   };
 
   const handleEdit = () => {
