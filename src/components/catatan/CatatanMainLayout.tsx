@@ -3,7 +3,7 @@ import CatatanSidebar from "./CatatanSidebar";
 import CatatanListPaginated from "./CatatanListPaginated";
 import FormCatatanAdd from "../forms/FormCatatanAdd";
 import supabase from "../../lib/supabase";
-import { Menu, X } from "lucide-react"; // Import icons for menu and close
+import { Menu, X } from "lucide-react";
 
 interface Category {
   id: string;
@@ -17,16 +17,16 @@ interface Folder {
   count: number;
 }
 
-export default function CatatanMainLayout() {
+const CatatanMainLayout = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State baru untuk mengontrol sidebar/drawer
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // State baru untuk memicu refresh CatatanListPaginated
 
-  // Fetch categories from Supabase
   const fetchCategories = async () => {
     try {
       const { data: categoriesData, error: categoriesError } = await supabase
@@ -61,7 +61,6 @@ export default function CatatanMainLayout() {
     }
   };
 
-  // Fetch folders from Supabase
   const fetchFolders = async () => {
     try {
       const { data: foldersData, error: foldersError } = await supabase
@@ -96,7 +95,6 @@ export default function CatatanMainLayout() {
     }
   };
 
-  // Load data on component mount
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -109,7 +107,7 @@ export default function CatatanMainLayout() {
 
   const handleAddNew = () => {
     setShowAddForm(true);
-    setIsSidebarOpen(false); // Tutup sidebar setelah aksi di mobile
+    setIsSidebarOpen(false);
   };
 
   const handleFormSuccess = async () => {
@@ -117,6 +115,7 @@ export default function CatatanMainLayout() {
     setShowAddForm(false);
     // Refresh data after adding new catatan
     await Promise.all([fetchCategories(), fetchFolders()]);
+    setRefreshTrigger((prev) => prev + 1); // Increment trigger to refresh CatatanListPaginated
   };
 
   const handleFormCancel = () => {
@@ -178,7 +177,6 @@ export default function CatatanMainLayout() {
         />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
           {/* Header untuk Mobile/Tablet */}
@@ -192,7 +190,6 @@ export default function CatatanMainLayout() {
             </button>
           </div>
 
-          {/* Deskripsi di Desktop */}
           <p className="hidden md:block text-base-content/60 mb-6">
             Kelola semua catatan Anda dengan mudah
           </p>
@@ -230,6 +227,7 @@ export default function CatatanMainLayout() {
           <CatatanListPaginated
             selectedCategory={selectedCategory}
             selectedFolder={selectedFolder}
+            refreshTrigger={refreshTrigger}
           />
         </div>
       </div>
@@ -257,8 +255,8 @@ export default function CatatanMainLayout() {
               categories={categories}
               folders={folders}
               onAddNew={handleAddNew}
-              onCategorySelect={handleCategorySelectAndCloseSidebar} // Gunakan handler baru
-              onFolderSelect={handleFolderSelectAndCloseSidebar} // Gunakan handler baru
+              onCategorySelect={handleCategorySelectAndCloseSidebar}
+              onFolderSelect={handleFolderSelectAndCloseSidebar}
               selectedCategory={selectedCategory}
               selectedFolder={selectedFolder}
             />
@@ -266,7 +264,6 @@ export default function CatatanMainLayout() {
         </div>
       )}
 
-      {/* Add Form Modal */}
       {showAddForm && (
         <div className="modal modal-open">
           <div className="modal-box max-w-2xl">
@@ -281,4 +278,6 @@ export default function CatatanMainLayout() {
       )}
     </div>
   );
-}
+};
+
+export default CatatanMainLayout;
