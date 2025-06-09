@@ -1,12 +1,13 @@
 import { FileText } from "lucide-react";
 
 import ReactMarkdown from "react-markdown";
+
 import { Link } from "react-router";
 
 type Props = {
   id: string;
-  judul: string;
-  isi: string | null;
+  judul: string; // Matches CatatanWithDetails.judul_catatan
+  isi: string | null; // Matches CatatanWithDetails.isi_catatan
   createdAt: string;
 };
 

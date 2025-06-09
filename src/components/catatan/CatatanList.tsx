@@ -1,17 +1,8 @@
 import CatatanItem from "./CatatanItem";
-
-type Catatan = {
-  id: string;
-  title: string;
-  content: string;
-  category_id: string | null;
-  folder_id: string | null;
-  created_at: string;
-  updated_at: string;
-};
+import type { CatatanWithDetails } from "../../types/catatan.types";
 
 interface CatatanListProps {
-  catatan: Catatan[];
+  catatan: CatatanWithDetails[];
   loading?: boolean;
 }
 
@@ -28,8 +19,8 @@ const CatatanList = ({ catatan, loading = false }: CatatanListProps) => {
         <CatatanItem
           key={item.id}
           id={item.id}
-          judul={item.title}
-          isi={item.content}
+          judul={item.judul_catatan}
+          isi={item.isi_catatan}
           createdAt={item.created_at}
         />
       ))}
