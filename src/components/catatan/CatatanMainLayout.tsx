@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CatatanSidebar from "./CatatanSidebar";
 import CatatanListPaginated from "./CatatanListPaginated";
 import FormCatatanAdd from "../forms/FormCatatanAdd";
 import supabase from "../../lib/supabase";
 import { Menu, X } from "lucide-react";
+import ToastAlert from "../ToastAlert"; // Import ToastAlert
 
 interface Category {
   id: string;
@@ -26,6 +27,16 @@ const CatatanMainLayout = () => {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // State baru untuk memicu refresh CatatanListPaginated
+
+  const [toastAlert, setToastAlert] = useState<{
+    show: boolean;
+    type: "success" | "error" | "info";
+    message: string;
+  }>({
+    show: false,
+    type: "success",
+    message: "",
+  });
 
   const fetchCategories = async () => {
     try {
@@ -110,18 +121,22 @@ const CatatanMainLayout = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleFormSuccess = async () => {
+  const handleFormSuccess = useCallback(async () => {
     console.log("Catatan berhasil ditambahkan!");
-    setShowAddForm(false);
-    // Refresh data after adding new catatan
+    setShowAddForm(false); // Tutup modal terlebih dahulu
+    // Refresh data setelah menambahkan catatan baru
     await Promise.all([fetchCategories(), fetchFolders()]);
-    setRefreshTrigger((prev) => prev + 1); // Increment trigger to refresh CatatanListPaginated
-  };
+    setRefreshTrigger((prev) => prev + 1); // Increment trigger untuk refresh CatatanListPaginated
+    // ToastAlert akan ditampilkan oleh useEffect di FormCatatanAdd yang memanggil setParentToastAlert
+    // Tidak perlu clear toast alert di sini karena FormCatatanAdd sudah memanggil setParentToastAlert.
+  }, []); // Tambahkan dependensi jika ada, tapi karena tidak ada, biarkan kosong
 
-  const handleFormCancel = () => {
+  const handleFormCancel = useCallback(() => {
     console.log("Cancelled");
     setShowAddForm(false);
-  };
+    // Clear toast alert jika pengguna membatalkan dan ada pesan yang mungkin tertunda
+    setToastAlert({ show: false, type: "success", message: "" });
+  }, []);
 
   // Fungsi untuk menangani pemilihan kategori dan menutup sidebar di mobile
   const handleCategorySelectAndCloseSidebar = (categoryId: string | null) => {
@@ -134,6 +149,13 @@ const CatatanMainLayout = () => {
     setSelectedFolder(folderId);
     setIsSidebarOpen(false); // Tutup sidebar setelah memilih folder
   };
+
+  const closeToast = useCallback(() => {
+    setToastAlert({ show: false, type: "success", message: "" });
+    // Jika perlu, clear messages dari useCatatan hook
+    // Misalnya, jika Anda memiliki akses ke clearMessages dari useCatatan di sini:
+    // clearMessages();
+  }, []);
 
   if (loading) {
     return (
@@ -271,10 +293,21 @@ const CatatanMainLayout = () => {
             <FormCatatanAdd
               onSuccess={handleFormSuccess}
               onCancel={handleFormCancel}
+              setParentToastAlert={setToastAlert} // Teruskan setToastAlert ke FormCatatanAdd
             />
           </div>
           <div className="modal-backdrop" onClick={handleFormCancel}></div>
         </div>
+      )}
+
+      {/* Toast Alerts (Untuk pesan sukses/error dari form) */}
+      {toastAlert.show && (
+        <ToastAlert
+          type={toastAlert.type}
+          message={toastAlert.message}
+          onClose={closeToast}
+          duration={4000} // Durasi default
+        />
       )}
     </div>
   );
