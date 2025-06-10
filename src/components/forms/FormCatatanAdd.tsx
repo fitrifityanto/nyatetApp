@@ -27,6 +27,9 @@ interface FormCatatanAddProps {
   kategoris?: KategoriOption[];
   folders?: FolderOption[];
   className?: string;
+  setParentToastAlert: (
+    toast: { show: boolean; type: "success" | "error" | "info"; message: string }
+  ) => void; // Prop baru untuk set toast di parent
 }
 
 const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
@@ -35,6 +38,7 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
   kategoris: initialKategorisFromProps = [],
   folders: initialFoldersFromProps = [],
   className = "",
+  setParentToastAlert, // Terima prop baru
 }) => {
   const {
     createCatatan,
@@ -92,16 +96,6 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
     fetchFolders,
   });
 
-  const [toastAlert, setToastAlert] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({
-    show: false,
-    type: "success",
-    message: "",
-  });
-
   const [draftToast, setDraftToast] = useState<{
     show: boolean;
     type: "success" | "error";
@@ -117,42 +111,32 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
     loadDraft();
   }, [loadDraft]);
 
-  // Handle success message
+  // Handle success message (pindah ke parent)
   useEffect(() => {
     if (success) {
-      setToastAlert({
+      setParentToastAlert({
         show: true,
         type: "success",
         message: success,
       });
-
-      const timer = setTimeout(() => {
-        clearMessages();
-        if (onSuccess) {
-          onSuccess();
-        }
-      }, 4000);
-
-      return () => clearTimeout(timer);
+      // clearMessages(); // Jangan clear disini, clear di parent saat toast sudah selesai
+      if (onSuccess) {
+        onSuccess(); // Tutup modal
+      }
     }
-  }, [success, clearMessages, onSuccess]);
+  }, [success, setParentToastAlert, onSuccess]);
 
-  // Handle error message
+  // Handle error message (pindah ke parent)
   useEffect(() => {
     if (error) {
-      setToastAlert({
+      setParentToastAlert({
         show: true,
         type: "error",
         message: error,
       });
-
-      const timer = setTimeout(() => {
-        clearMessages();
-      }, 5000);
-
-      return () => clearTimeout(timer);
+      // clearMessages(); // Jangan clear disini, clear di parent saat toast sudah selesai
     }
-  }, [error, clearMessages]);
+  }, [error, setParentToastAlert]);
 
   const handleAddKategori = useCallback(() => {
     if (newKategoriName.trim()) {
@@ -190,8 +174,8 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      clearMessages();
-      setToastAlert({ show: false, type: "success", message: "" });
+      clearMessages(); // Clear messages dari hook useCatatan
+      setParentToastAlert({ show: false, type: "success", message: "" }); // Clear toast alert di parent
 
       if (!validateForm()) {
         return;
@@ -200,16 +184,14 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
       try {
         const submissionData = getSubmissionData();
 
-        // createCatatan now handles ensuring defaults exist in DB
-        // if they are selected as the value.
         const result = await createCatatan(submissionData);
 
         if (result.success) {
           clearDraft();
           resetForm();
-          // Refresh options after successful creation to get updated data from DB
-          // This is important if a new category/folder was created (including default ones)
           await refreshOptions();
+          // onSuccess akan dipanggil oleh useEffect(success) di atas, yang akan menutup modal
+          // dan memicu setParentToastAlert untuk menampilkan pesan sukses.
         }
       } catch (err) {
         console.error("Error in form submission:", err);
@@ -217,7 +199,7 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
           err instanceof Error
             ? err.message
             : "Terjadi kesalahan yang tidak terduga";
-        setToastAlert({
+        setParentToastAlert({
           show: true,
           type: "error",
           message: errorMessage,
@@ -232,6 +214,7 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
       clearDraft,
       resetForm,
       refreshOptions,
+      setParentToastAlert,
     ],
   );
 
@@ -265,13 +248,9 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
     resetForm();
     clearDraft();
     clearMessages();
-    setToastAlert({ show: false, type: "success", message: "" });
+    setParentToastAlert({ show: false, type: "success", message: "" }); // Clear toast alert di parent
     setDraftToast({ show: false, type: "success", message: "" });
-  }, [resetForm, clearDraft, clearMessages]);
-
-  const closeToast = useCallback(() => {
-    setToastAlert({ show: false, type: "success", message: "" });
-  }, []);
+  }, [resetForm, clearDraft, clearMessages, setParentToastAlert]);
 
   const closeDraftToast = useCallback(() => {
     setDraftToast({ show: false, type: "success", message: "" });
@@ -614,15 +593,7 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
         </div>
       </div>
 
-      {/* Toast Alerts */}
-      {toastAlert.show && (
-        <ToastAlert
-          type={toastAlert.type}
-          message={toastAlert.message}
-          onClose={closeToast}
-        />
-      )}
-
+      {/* Toast Alerts (Hanya untuk draftToast) */}
       {draftToast.show && (
         <ToastAlert
           type={draftToast.type}
