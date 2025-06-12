@@ -31,7 +31,7 @@ const ToastAlert: React.FC<ToastAlertProps> = ({
     }, duration);
 
     // Cleanup timer saat komponen di-unmount atau dependensi berubah
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); };
   }, [duration, onClose]);
 
   // Tidak merender komponen jika tidak terlihat

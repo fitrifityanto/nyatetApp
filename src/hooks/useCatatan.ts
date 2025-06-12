@@ -2,6 +2,9 @@ import supabase from "../lib/supabase";
 import { useCallback, useState } from "react";
 import type { CreateCatatanData, Catatan } from "../types/catatan.types";
 
+interface SelectedId {
+  id: string;
+}
 // Default values, dipindahkan ke sini karena logikanya akan terpusat di sini untuk DB interaction
 export const DEFAULT_KATEGORI_NAMA = "Tanpa Kategori";
 export const DEFAULT_FOLDER_NAMA = "Dokumen";
@@ -26,7 +29,7 @@ export const useCatatan = () => {
           .select("id")
           .eq("nama", kategoriName)
           .eq("user_id", userId)
-          .single();
+          .single<SelectedId>();
 
         if (fetchError && fetchError.code !== "PGRST116") {
           // PGRST116 = no rows returned (record not found)
@@ -42,14 +45,14 @@ export const useCatatan = () => {
           .from("kategori_catatan")
           .insert({ nama: kategoriName, user_id: userId })
           .select("id")
-          .single();
+          .single<SelectedId>();
 
         if (createError) {
           throw createError;
         }
-        if (!newKategori) {
-          throw new Error("Failed to create new kategori.");
-        }
+        // if (!newKategori) {
+        //   throw new Error("Failed to create new kategori.");
+        // }
         return newKategori.id;
       } catch (err) {
         console.error(`Error ensuring kategori '${kategoriName}' exists:`, err);
@@ -69,7 +72,7 @@ export const useCatatan = () => {
           .select("id")
           .eq("nama", folderName)
           .eq("user_id", userId)
-          .single();
+          .single<SelectedId>();
 
         if (fetchError && fetchError.code !== "PGRST116") {
           // PGRST116 = no rows returned
@@ -85,14 +88,14 @@ export const useCatatan = () => {
           .from("folder_catatan")
           .insert({ nama: folderName, user_id: userId })
           .select("id")
-          .single();
+          .single<SelectedId>();
 
         if (createError) {
           throw createError;
         }
-        if (!newFolder) {
-          throw new Error("Failed to create new folder.");
-        }
+        // if (!newFolder) {
+        //   throw new Error("Failed to create new folder.");
+        // }
         return newFolder.id;
       } catch (err) {
         console.error(`Error ensuring folder '${folderName}' exists:`, err);

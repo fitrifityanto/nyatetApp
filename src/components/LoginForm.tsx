@@ -37,7 +37,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-base-100 shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
         <label className="form-control w-full">
           <div className="label">
             <span className="label-text">Email</span>
@@ -47,7 +48,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             placeholder="email@example.com"
             className="input input-bordered w-full"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); }}
             required
           />
         </label>
@@ -60,7 +61,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             placeholder="********"
             className="input input-bordered w-full"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); }}
             required
           />
         </label>

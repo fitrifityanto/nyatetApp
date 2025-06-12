@@ -8,7 +8,7 @@ import type { Catatan } from "../types/catatan.types";
 const CatatanEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getCatatanById, isLoading, error } = useCatatan();
+  const { getCatatanById } = useCatatan();
 
   const [catatan, setCatatan] = useState<Catatan | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
@@ -107,7 +107,9 @@ const CatatanEditPage: React.FC = () => {
                   Kembali ke Daftar Catatan
                 </button>
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => {
+                    window.location.reload();
+                  }}
                   className="btn btn-ghost"
                 >
                   Coba Lagi

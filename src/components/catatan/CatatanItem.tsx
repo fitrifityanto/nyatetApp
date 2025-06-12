@@ -4,12 +4,12 @@ import ReactMarkdown from "react-markdown";
 
 import { Link } from "react-router";
 
-type Props = {
+interface Props {
   id: string;
   judul: string; // Matches CatatanWithDetails.judul_catatan
   isi: string | null; // Matches CatatanWithDetails.isi_catatan
   createdAt: string;
-};
+}
 
 const CatatanItem = ({ id, judul, isi, createdAt }: Props) => {
   return (
@@ -42,7 +42,7 @@ const CatatanItem = ({ id, judul, isi, createdAt }: Props) => {
                   pre: ({ children }) => <span>{children}</span>,
                 }}
               >
-                {isi || "_(Tidak ada isi)_"}
+                {isi ?? "_(Tidak ada isi)_"}
               </ReactMarkdown>
             </div>
           </div>
