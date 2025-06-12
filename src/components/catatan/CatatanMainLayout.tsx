@@ -41,7 +41,10 @@ const CatatanMainLayout = () => {
   const fetchCategories = async () => {
     try {
       const { data: categoriesData, error: categoriesError } = await supabase
-        .from("kategori_catatan")
+        .from<
+          "kategori_catatan",
+          { id: string; nama: string }
+        >("kategori_catatan")
         .select("id, nama")
         .order("nama");
 
@@ -53,15 +56,25 @@ const CatatanMainLayout = () => {
       // Get count for each category (assuming you have a catatan table with kategori_id)
       const categoriesWithCount = await Promise.all(
         categoriesData.map(async (category) => {
-          const { count } = await supabase
-            .from("catatan") // Sesuaikan dengan nama tabel catatan Anda
-            .select("*", { count: "exact", head: true })
+          const { count, error: countError } = await supabase
+            .from("catatan")
+            .select("count()", { count: "exact", head: true }) // Meminta hanya 'count()'
             .eq("kategori_id", category.id);
+
+          if (countError) {
+            console.error(`Error fetching count for category`, countError);
+            // Anda bisa memilih untuk melempar error atau mengembalikan count 0
+            return {
+              id: category.id,
+              name: category.nama,
+              count: 0,
+            };
+          }
 
           return {
             id: category.id,
             name: category.nama,
-            count: count || 0,
+            count: count ?? 0,
           };
         }),
       );
@@ -95,7 +108,7 @@ const CatatanMainLayout = () => {
           return {
             id: folder.id,
             name: folder.nama,
-            count: count || 0,
+            count: count ?? 0,
           };
         }),
       );
@@ -113,7 +126,7 @@ const CatatanMainLayout = () => {
       setLoading(false);
     };
 
-    loadData();
+    void loadData();
   }, []);
 
   const handleAddNew = () => {
@@ -206,7 +219,9 @@ const CatatanMainLayout = () => {
             <h1 className="text-2xl md:text-3xl font-bold">Catatan</h1>
             <button
               className="btn btn-ghost md:hidden" // Hanya tampil di mobile/tablet
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              onClick={() => {
+                setIsSidebarOpen(!isSidebarOpen);
+              }}
             >
               {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -217,14 +232,16 @@ const CatatanMainLayout = () => {
           </p>
 
           {/* Filter Badge */}
-          {(selectedCategory || selectedFolder) && (
+          {(selectedCategory ?? selectedFolder) && (
             <div className="mb-4 flex flex-wrap gap-2">
               {selectedCategory && (
                 <div className="badge badge-primary gap-2">
                   Kategori:{" "}
                   {categories.find((c) => c.id === selectedCategory)?.name}
                   <button
-                    onClick={() => setSelectedCategory(null)}
+                    onClick={() => {
+                      setSelectedCategory(null);
+                    }}
                     className="btn btn-ghost btn-xs"
                   >
                     ×
@@ -235,7 +252,9 @@ const CatatanMainLayout = () => {
                 <div className="badge badge-secondary gap-2">
                   Folder: {folders.find((f) => f.id === selectedFolder)?.name}
                   <button
-                    onClick={() => setSelectedFolder(null)}
+                    onClick={() => {
+                      setSelectedFolder(null);
+                    }}
                     className="btn btn-ghost btn-xs"
                   >
                     ×
@@ -260,7 +279,9 @@ const CatatanMainLayout = () => {
           {/* Overlay */}
           <div
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-black/20 backdrop-blur-sm"
-            onClick={() => setIsSidebarOpen(false)}
+            onClick={() => {
+              setIsSidebarOpen(false);
+            }}
           ></div>
 
           {/* Sidebar Content */}
@@ -268,7 +289,9 @@ const CatatanMainLayout = () => {
             <div className="flex justify-end mb-4">
               <button
                 className="btn btn-ghost"
-                onClick={() => setIsSidebarOpen(false)}
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                }}
               >
                 <X size={24} />
               </button>
@@ -291,9 +314,9 @@ const CatatanMainLayout = () => {
           <div className="modal-box max-w-2xl">
             <h3 className="font-bold text-lg mb-4">Tambah Catatan Baru</h3>
             <FormCatatanAdd
-              onSuccess={handleFormSuccess}
+              onSuccess={() => void handleFormSuccess()}
               onCancel={handleFormCancel}
-              setParentToastAlert={setToastAlert} // Teruskan setToastAlert ke FormCatatanAdd
+              setParentToastAlert={setToastAlert}
             />
           </div>
           <div className="modal-backdrop" onClick={handleFormCancel}></div>

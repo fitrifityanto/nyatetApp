@@ -133,7 +133,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
         }
       }, 4000);
 
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); };
     }
   }, [success, clearMessages, onSuccess]);
 
@@ -150,7 +150,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
         clearMessages();
       }, 5000);
 
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); };
     }
   }, [error, clearMessages]);
 
@@ -296,7 +296,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                 <input
                   type="text"
                   value={formData.judul_catatan}
-                  onChange={(e) => updateField("judul_catatan", e.target.value)}
+                  onChange={(e) => { updateField("judul_catatan", e.target.value); }}
                   placeholder="Masukkan judul catatan..."
                   className={`input input-bordered w-full focus:input-primary ${
                     errors.judul_catatan ? "input-error" : ""
@@ -317,7 +317,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                 </label>
                 <textarea
                   value={formData.isi_catatan}
-                  onChange={(e) => updateField("isi_catatan", e.target.value)}
+                  onChange={(e) => { updateField("isi_catatan", e.target.value); }}
                   className={`textarea textarea-bordered h-96 w-full focus:textarea-primary resize-y ${
                     errors.isi_catatan ? "textarea-error" : ""
                   }`}
@@ -344,7 +344,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       <select
                         value={formData.kategori_nama}
                         onChange={(e) =>
-                          updateField("kategori_nama", e.target.value)
+                          { updateField("kategori_nama", e.target.value); }
                         }
                         className={`select select-bordered w-full focus:select-primary ${
                           errors.kategori_nama ? "select-error" : ""
@@ -366,7 +366,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       </select>
                       <button
                         type="button"
-                        onClick={() => setShowAddKategori(true)}
+                        onClick={() => { setShowAddKategori(true); }}
                         className="btn btn-outline btn-primary btn-square"
                         disabled={isLoading}
                         title="Tambah kategori baru"
@@ -379,7 +379,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       <input
                         type="text"
                         value={newKategoriName}
-                        onChange={(e) => setNewKategoriName(e.target.value)}
+                        onChange={(e) => { setNewKategoriName(e.target.value); }}
                         placeholder="Nama kategori baru..."
                         className="input input-bordered w-full focus:input-primary"
                         disabled={isLoading}
@@ -430,7 +430,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       <select
                         value={formData.folder_nama}
                         onChange={(e) =>
-                          updateField("folder_nama", e.target.value)
+                          { updateField("folder_nama", e.target.value); }
                         }
                         className={`select select-bordered w-full focus:select-primary ${
                           errors.folder_nama ? "select-error" : ""
@@ -452,7 +452,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       </select>
                       <button
                         type="button"
-                        onClick={() => setShowAddFolder(true)}
+                        onClick={() => { setShowAddFolder(true); }}
                         className="btn btn-outline btn-primary btn-square"
                         disabled={isLoading}
                         title="Tambah folder baru"
@@ -465,7 +465,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       <input
                         type="text"
                         value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
+                        onChange={(e) => { setNewFolderName(e.target.value); }}
                         placeholder="Nama folder baru..."
                         className="input input-bordered w-full focus:input-primary"
                         disabled={isLoading}
@@ -510,7 +510,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                     <input
                       type="checkbox"
                       checked={formData.pinned}
-                      onChange={(e) => updateField("pinned", e.target.checked)}
+                      onChange={(e) => { updateField("pinned", e.target.checked); }}
                       className="checkbox checkbox-primary mr-3 flex-shrink-0"
                       disabled={isLoading}
                     />
@@ -532,7 +532,7 @@ const FormCatatanEdit: React.FC<FormCatatanEditProps> = ({
                       type="checkbox"
                       checked={formData.is_archived}
                       onChange={(e) =>
-                        updateField("is_archived", e.target.checked)
+                        { updateField("is_archived", e.target.checked); }
                       }
                       className="checkbox checkbox-secondary mr-3 flex-shrink-0"
                       disabled={isLoading}

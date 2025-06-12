@@ -1,6 +1,5 @@
 import { useState } from "react";
-// import supabase from "../lib/supabase";
-// import { useAuth } from "../hooks/useAuth";
+
 import type { RegisterCredentials } from "../lib/auth";
 
 interface RegisterFormProps {
@@ -14,15 +13,14 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // const { register } = useAuth();
-
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     try {
-      // const result = await register({ email, password, fullName });
       await onRegister({ email, password, fullName });
       console.log("registration successful");
       setMessage("Registration successful. Check your email for confirmation.");
@@ -31,27 +29,13 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
       setMessage("Registration failed. Please try again.");
     }
 
-    // const { error } = await supabase.auth.signUp({
-    //   email,
-    //   password,
-    //   options: {
-    //     data: { full_name: fullName },
-    //   },
-    // });
-    //
-    // if (error) {
-    //   console.error("Registration error:", error.message);
-    // } else {
-    //   setMessage("Registration successful. Check your email for confirmation.");
-    //   console.log("Check your email for confirmation");
-    // }
     setLoading(false);
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-base-100 shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Register</h2>
-      <form onSubmit={handleRegister} className="space-y-4">
+      <form onSubmit={(e) => void handleRegister(e)} className="space-y-4">
         <label className="form-control w-full">
           <div className="label">
             <span className="label-text">Full Name</span>
@@ -61,7 +45,9 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
             placeholder="Nama lengkap"
             className="input input-bordered w-full"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              setFullName(e.target.value);
+            }}
             required
           />
         </label>
@@ -75,7 +61,9 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
             placeholder="email@example.com"
             className="input input-bordered w-full"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
             required
           />
         </label>
@@ -89,7 +77,9 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
             placeholder="********"
             className="input input-bordered w-full"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
             required
           />
         </label>

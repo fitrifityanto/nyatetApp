@@ -48,7 +48,7 @@ export default function CatatanSidebar({
         <ul className="space-y-1">
           <li>
             <button
-              onClick={() => onCategorySelect(null)}
+              onClick={() => { onCategorySelect(null); }}
               className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 ${
                 selectedCategory === null ? "bg-base-300 font-medium" : ""
               }`}
@@ -60,7 +60,7 @@ export default function CatatanSidebar({
             categories.map((category) => (
               <li key={category.id}>
                 <button
-                  onClick={() => onCategorySelect(category.id)}
+                  onClick={() => { onCategorySelect(category.id); }}
                   className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 flex justify-between ${
                     selectedCategory === category.id
                       ? "bg-base-300 font-medium"
@@ -89,7 +89,7 @@ export default function CatatanSidebar({
         <ul className="space-y-1">
           <li>
             <button
-              onClick={() => onFolderSelect(null)}
+              onClick={() => { onFolderSelect(null); }}
               className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 ${
                 selectedFolder === null ? "bg-base-300 font-medium" : ""
               }`}
@@ -101,7 +101,7 @@ export default function CatatanSidebar({
             folders.map((folder) => (
               <li key={folder.id}>
                 <button
-                  onClick={() => onFolderSelect(folder.id)}
+                  onClick={() => { onFolderSelect(folder.id); }}
                   className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 flex justify-between ${
                     selectedFolder === folder.id
                       ? "bg-base-300 font-medium"

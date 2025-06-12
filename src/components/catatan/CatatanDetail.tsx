@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import ReactMarkdown from "react-markdown";
 import {
@@ -17,11 +17,11 @@ import {
 import supabase from "../../lib/supabase";
 import ToastAlert from "../ToastAlert";
 
-type Props = {
+interface Props {
   id: string;
-};
+}
 
-type Catatan = {
+interface Catatan {
   judul_catatan: string;
   isi_catatan: string | null;
   is_archived: boolean;
@@ -30,12 +30,31 @@ type Catatan = {
   updated_at: string;
   kategori_catatan?: { nama: string };
   folder_catatan?: { nama: string };
-};
+}
 
-type ToastType = {
+interface ToastType {
   type: "success" | "error" | "info";
   message: string;
   show: boolean;
+}
+
+const getPlainText = (node: React.ReactNode): string => {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(getPlainText).join("");
+  }
+  // Periksa elemen React (misalnya <em>, <strong>)
+  if (React.isValidElement(node)) {
+    // Type assertion: Memberi tahu TypeScript bahwa props elemen ini mungkin memiliki properti children.
+    const elementProps = node.props as { children?: React.ReactNode };
+
+    if (elementProps.children !== undefined) {
+      return getPlainText(elementProps.children);
+    }
+  }
+  return ""; // Abaikan tipe lain (boolean, null, undefined) atau elemen tanpa children
 };
 
 const CatatanDetail = ({ id }: Props) => {
@@ -82,10 +101,10 @@ const CatatanDetail = ({ id }: Props) => {
         .eq("id", id)
         .single<Catatan>();
 
-      if (error || !data) {
+      if (error) {
         console.error(
           "Error fetching catatan:",
-          error?.message || "Data not found",
+          error.message || "Data not found",
         );
         setCatatan(null);
       } else {
@@ -95,15 +114,15 @@ const CatatanDetail = ({ id }: Props) => {
       setLoading(false);
     };
 
-    fetchCatatan();
+    void fetchCatatan();
   }, [id]);
 
   const handleBack = () => {
-    navigate("/catatan");
+    void navigate("/catatan");
   };
 
   const handleEdit = () => {
-    navigate(`/catatan/edit/${id}`);
+    void navigate(`/catatan/edit/${id}`);
   };
 
   const handleDelete = async () => {
@@ -119,7 +138,7 @@ const CatatanDetail = ({ id }: Props) => {
         showToast("success", "Catatan berhasil dihapus.");
 
         setTimeout(() => {
-          navigate("/catatan");
+          void navigate("/catatan");
         }, 1500);
       }
     } catch (error) {
@@ -160,7 +179,7 @@ const CatatanDetail = ({ id }: Props) => {
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <span
             className="hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer"
-            onClick={() => navigate("/catatan")}
+            onClick={() => void navigate("/catatan")}
           >
             Catatan
           </span>
@@ -238,13 +257,8 @@ const CatatanDetail = ({ id }: Props) => {
         <ReactMarkdown
           components={{
             p: ({ children }) => {
-              // Deteksi apakah ada teks Arab
-              const textContent =
-                typeof children === "string"
-                  ? children
-                  : Array.isArray(children)
-                    ? children.join("")
-                    : String(children);
+              const textContent = getPlainText(children);
+
               const hasArabic =
                 /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
                   textContent,
@@ -283,8 +297,12 @@ const CatatanDetail = ({ id }: Props) => {
               }
             },
             h1: ({ children }) => {
-              const textContent =
-                typeof children === "string" ? children : String(children);
+              const childArray = React.Children.toArray(children);
+
+              // Gabungkan semua string literal (abaikan elemen React)
+              const textContent = childArray
+                .filter((child) => typeof child === "string")
+                .join("");
               const hasArabic =
                 /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
                   textContent,
@@ -300,8 +318,7 @@ const CatatanDetail = ({ id }: Props) => {
               );
             },
             h2: ({ children }) => {
-              const textContent =
-                typeof children === "string" ? children : String(children);
+              const textContent = getPlainText(children);
               const hasArabic =
                 /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
                   textContent,
@@ -317,8 +334,7 @@ const CatatanDetail = ({ id }: Props) => {
               );
             },
             h3: ({ children }) => {
-              const textContent =
-                typeof children === "string" ? children : String(children);
+              const textContent = getPlainText(children);
               const hasArabic =
                 /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
                   textContent,
@@ -347,8 +363,7 @@ const CatatanDetail = ({ id }: Props) => {
               <li className="leading-relaxed">{children}</li>
             ),
             blockquote: ({ children }) => {
-              const textContent =
-                typeof children === "string" ? children : String(children);
+              const textContent = getPlainText(children);
               const hasArabic =
                 /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
                   textContent,
@@ -408,7 +423,7 @@ const CatatanDetail = ({ id }: Props) => {
             ),
           }}
         >
-          {catatan.isi_catatan || "*Konten kosong*"}
+          {catatan.isi_catatan ?? "*Konten kosong*"}
         </ReactMarkdown>
       </article>
 
@@ -422,8 +437,8 @@ const CatatanDetail = ({ id }: Props) => {
             </span>
           </div>
           <div className="flex flex-wrap gap-4 text-xs">
-            <span>Kategori: {catatan.kategori_catatan?.nama || "-"}</span>
-            <span>Folder: {catatan.folder_catatan?.nama || "-"}</span>
+            <span>Kategori: {catatan.kategori_catatan?.nama ?? "-"}</span>
+            <span>Folder: {catatan.folder_catatan?.nama ?? "-"}</span>
             <span>Status: {catatan.is_archived ? "Diarsipkan" : "Aktif"}</span>
           </div>
         </div>
@@ -459,13 +474,15 @@ const CatatanDetail = ({ id }: Props) => {
             </p>
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => setShowDeleteModal(false)}
+                onClick={() => {
+                  setShowDeleteModal(false);
+                }}
                 className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Batal
               </button>
               <button
-                onClick={handleDelete}
+                onClick={() => void handleDelete()}
                 className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
               >
                 Hapus

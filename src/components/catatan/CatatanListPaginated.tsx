@@ -22,11 +22,10 @@ const CatatanListPaginated = ({
   );
   const [loading, setLoading] = useState(true);
 
-  const { currentItems, hasMore, loadMore, reset, currentPage, totalItems } =
-    usePagination({
-      data: filteredCatatan,
-      itemsPerPage: 10,
-    });
+  const { currentItems, hasMore, loadMore, reset, totalItems } = usePagination({
+    data: filteredCatatan,
+    itemsPerPage: 10,
+  });
 
   const fetchCatatan = async () => {
     try {
@@ -50,10 +49,10 @@ const CatatanListPaginated = ({
         const mockData: CatatanWithDetails[] = Array.from(
           { length: 25 },
           (_, i) => ({
-            id: `catatan-${i + 1}`,
+            id: `catatan-${String(i + 1)}`,
             user_id: "mock-user",
-            judul_catatan: `Catatan ${i + 1}`,
-            isi_catatan: `Ini adalah konten catatan ke-${i + 1}`,
+            judul_catatan: `Catatan ${String(i + 1)}`,
+            isi_catatan: `Ini adalah konten catatan ke-${String(i + 1)}`,
             kategori_id:
               i % 3 === 0 ? "cat-1" : i % 3 === 1 ? "cat-2" : "cat-3",
             folder_id: i % 2 === 0 ? "folder-1" : "folder-2",
@@ -65,7 +64,7 @@ const CatatanListPaginated = ({
         );
         setAllCatatan(mockData);
       } else {
-        setAllCatatan(data || []);
+        setAllCatatan(data);
       }
     } catch (error) {
       console.error("Error fetching catatan:", error);
@@ -78,7 +77,7 @@ const CatatanListPaginated = ({
 
   // Fetch data on component mount and when refreshTrigger changes
   useEffect(() => {
-    fetchCatatan();
+    void fetchCatatan();
   }, [refreshTrigger]);
 
   // Filter catatan based on selected category and folder
@@ -106,7 +105,7 @@ const CatatanListPaginated = ({
       {/* Results Info */}
       <div className="text-sm text-base-content/70">
         Menampilkan {currentItems.length} dari {totalItems} catatan
-        {(selectedCategory || selectedFolder) && (
+        {(selectedCategory ?? selectedFolder) && (
           <span className="ml-2">(filtered)</span>
         )}
       </div>

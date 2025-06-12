@@ -86,7 +86,8 @@ export const useDynamicOptions = ({
       }
     };
 
-    loadAndMergeInitialData();
+    // Menggunakan 'void' untuk menandai Promise tidak di-await
+    void loadAndMergeInitialData(); //
   }, [
     fetchKategoris,
     fetchFolders,
@@ -100,7 +101,8 @@ export const useDynamicOptions = ({
     const trimmedName = name.trim();
     if (!trimmedName) return null;
 
-    const newId = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`; // Temporary ID
+    // Mengkonversi Date.now() menjadi string secara eksplisit
+    const newId = `temp_${String(Date.now())}_${Math.random().toString(36).substring(7)}`; //
     const newKategori = { id: newId, name: trimmedName };
 
     setKategoris((prev) => {
@@ -118,7 +120,8 @@ export const useDynamicOptions = ({
     const trimmedName = name.trim();
     if (!trimmedName) return null;
 
-    const newId = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`; // Temporary ID
+    // Mengkonversi Date.now() menjadi string secara eksplisit
+    const newId = `temp_${String(Date.now())}_${Math.random().toString(36).substring(7)}`; //
     const newFolder = { id: newId, name: trimmedName };
 
     setFolders((prev) => {

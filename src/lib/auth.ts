@@ -1,5 +1,10 @@
 import supabase from "./supabase";
-// import { User, Session } from "@supabase/supabase-js";
+import type {
+  User,
+  AuthResponse,
+  UserResponse,
+  PostgrestSingleResponse,
+} from "@supabase/supabase-js";
 
 export interface LoginCredentials {
   email: string;
@@ -10,9 +15,14 @@ export interface RegisterCredentials extends LoginCredentials {
   fullName: string;
 }
 
+interface UserProfile {
+  id: string;
+  full_name: string;
+}
+
 // Login function
 export const login = async ({ email, password }: LoginCredentials) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data, error }: AuthResponse = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -21,22 +31,26 @@ export const login = async ({ email, password }: LoginCredentials) => {
     throw new Error(error.message);
   }
 
-  // Optional: Fetch profile data
   if (data.user) {
-    const { data: profileData, error: profileError } = await supabase
+    const user: User = data.user;
+
+    const {
+      data: profileData,
+      error: profileError,
+    }: PostgrestSingleResponse<UserProfile> = await supabase
       .from("profiles")
       .select("*")
-      .eq("id", data.user.id)
+      .eq("id", user.id)
       .single();
 
     if (profileError) {
       console.warn("Could not fetch profile:", profileError.message);
     }
 
-    return { user: data.user, profile: profileData };
+    return { user: user, profile: profileData };
+  } else {
+    throw new Error("Login successful, but user data is missing.");
   }
-
-  return { user: data.user, profile: null };
 };
 
 // Register function
@@ -45,7 +59,7 @@ export const register = async ({
   password,
   fullName,
 }: RegisterCredentials) => {
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error }: AuthResponse = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -72,12 +86,11 @@ export const logout = async () => {
 
 // Get current user
 export const getCurrentUser = async () => {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data, error }: UserResponse = await supabase.auth.getUser();
+
   if (error) {
     throw new Error(error.message);
   }
-  return user;
+
+  return data.user;
 };
