@@ -1,12 +1,10 @@
-// src/components/CatatanMainLayout.tsx
-
 import { useState, useEffect, useCallback } from "react";
 import CatatanSidebar from "./CatatanSidebar";
 import CatatanListPaginated from "./CatatanListPaginated";
 import FormCatatanAdd from "../forms/FormCatatanAdd";
 import supabase from "../../lib/supabase";
 import { Menu, X } from "lucide-react";
-import ToastAlert from "../ToastAlert"; // Import ToastAlert
+import ToastAlert from "../ToastAlert";
 
 interface Category {
   id: string;
@@ -14,10 +12,33 @@ interface Category {
   count: number;
 }
 
+interface DatabaseCategory {
+  id: string;
+  user_id: string;
+  nama: string;
+  created_at: string;
+}
+
+type MinimalCategory = Pick<DatabaseCategory, "id" | "nama">;
+
 interface Folder {
   id: string;
   name: string;
   count: number;
+}
+
+interface DatabaseFolder {
+  id: string;
+  user_id: string;
+  nama: string;
+  created_at: string;
+}
+
+type MinimalFolder = Pick<DatabaseFolder, "id" | "nama">;
+
+interface SupabaseCountResult {
+  count: number | null;
+  error: Error | null;
 }
 
 const CatatanMainLayout = () => {
@@ -26,7 +47,7 @@ const CatatanMainLayout = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [loading, setLoading] = useState(true);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // State baru untuk memicu refresh CatatanListPaginated
 
@@ -46,19 +67,17 @@ const CatatanMainLayout = () => {
       const userId = userAuthData.user?.id; // Ambil user ID
 
       if (!userId) {
-        // Jika tidak ada user ID, mungkin user belum login, atau token expired
-        // Set categories menjadi kosong dan keluar dari fungsi
         setCategories([]);
         return;
       }
 
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from<"kategori_catatan", { id: string; nama: string }>(
-          "kategori_catatan",
-        )
+      const { data, error: categoriesError } = await supabase
+        .from("kategori_catatan")
         .select("id, nama")
-        .eq("user_id", userId) // **Tambahkan filter user_id di sini**
+        .eq("user_id", userId)
         .order("nama");
+
+      const categoriesData = data as MinimalCategory[];
 
       if (categoriesError) {
         console.error("Error fetching categories:", categoriesError);
@@ -67,11 +86,12 @@ const CatatanMainLayout = () => {
 
       const categoriesWithCount = await Promise.all(
         categoriesData.map(async (category) => {
-          const { count, error: countError } = await supabase
-            .from("catatan")
-            .select("*", { count: "exact", head: true }) // Meminta hanya 'count()'
-            .eq("kategori_id", category.id)
-            .eq("user_id", userId); // **Tambahkan filter user_id di sini**
+          const { count, error: countError }: SupabaseCountResult =
+            await supabase
+              .from("catatan")
+              .select("*", { count: "exact", head: true })
+              .eq("kategori_id", category.id)
+              .eq("user_id", userId);
 
           if (countError) {
             console.error(
@@ -101,19 +121,21 @@ const CatatanMainLayout = () => {
 
   const fetchFolders = async () => {
     try {
-      const { data: userAuthData } = await supabase.auth.getUser(); // Ambil data user
-      const userId = userAuthData.user?.id; // Ambil user ID
+      const { data: userAuthData } = await supabase.auth.getUser();
+      const userId = userAuthData.user?.id;
 
       if (!userId) {
         setFolders([]);
         return;
       }
 
-      const { data: foldersData, error: foldersError } = await supabase
+      const { data, error: foldersError } = await supabase
         .from("folder_catatan")
         .select("id, nama")
-        .eq("user_id", userId) // **Tambahkan filter user_id di sini**
+        .eq("user_id", userId)
         .order("nama");
+
+      const foldersData = data as MinimalFolder[];
 
       if (foldersError) {
         console.error("Error fetching folders:", foldersError);
@@ -122,14 +144,14 @@ const CatatanMainLayout = () => {
 
       const foldersWithCount = await Promise.all(
         foldersData.map(async (folder) => {
-          const { count, error: countError } = await supabase // Tambahkan error di sini
-            .from("catatan") // Sesuaikan dengan nama tabel catatan Anda
-            .select("*", { count: "exact", head: true })
-            .eq("folder_id", folder.id)
-            .eq("user_id", userId); // **Tambahkan filter user_id di sini**
+          const { count, error: countError }: SupabaseCountResult =
+            await supabase
+              .from("catatan")
+              .select("*", { count: "exact", head: true })
+              .eq("folder_id", folder.id)
+              .eq("user_id", userId);
 
           if (countError) {
-            // Tangani error untuk count folder
             console.error(
               `Error fetching count for folder ${folder.nama}:`,
               countError,
@@ -157,9 +179,7 @@ const CatatanMainLayout = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
       await Promise.all([fetchCategories(), fetchFolders()]);
-      setLoading(false);
     };
 
     void loadData();
@@ -172,10 +192,10 @@ const CatatanMainLayout = () => {
 
   const handleFormSuccess = useCallback(async () => {
     console.log("Catatan berhasil ditambahkan!");
-    setShowAddForm(false); // Tutup modal terlebih dahulu
-    // Refresh data setelah menambahkan catatan baru
+    setShowAddForm(false);
+
     await Promise.all([fetchCategories(), fetchFolders()]);
-    setRefreshTrigger((prev) => prev + 1); // Increment trigger untuk refresh CatatanListPaginated
+    setRefreshTrigger((prev) => prev + 1);
     setToastAlert({
       show: true,
       type: "success",
@@ -186,9 +206,9 @@ const CatatanMainLayout = () => {
   const handleFormCancel = useCallback(() => {
     console.log("Cancelled");
     setShowAddForm(false);
-    // Clear toast alert jika pengguna membatalkan dan ada pesan yang mungkin tertunda
+
     setToastAlert({ show: false, type: "success", message: "" });
-  }, []); // Fungsi untuk menang
+  }, []);
 
   const closeToast = useCallback(() => {
     setToastAlert((prev) => ({ ...prev, show: false }));
@@ -197,8 +217,8 @@ const CatatanMainLayout = () => {
   const handleCategorySelectAndCloseSidebar = useCallback(
     (categoryId: string | null) => {
       setSelectedCategory(categoryId);
-      setSelectedFolder(null); // Reset folder selection when category is selected
-      setIsSidebarOpen(false); // Close sidebar on mobile
+      setSelectedFolder(null);
+      setIsSidebarOpen(false);
     },
     [],
   );
@@ -206,8 +226,8 @@ const CatatanMainLayout = () => {
   const handleFolderSelectAndCloseSidebar = useCallback(
     (folderId: string | null) => {
       setSelectedFolder(folderId);
-      setSelectedCategory(null); // Reset category selection when folder is selected
-      setIsSidebarOpen(false); // Close sidebar on mobile
+      setSelectedCategory(null);
+      setIsSidebarOpen(false);
     },
     [],
   );
@@ -233,8 +253,11 @@ const CatatanMainLayout = () => {
         <div className="navbar bg-base-200 shadow-md md:hidden">
           <div className="flex-none">
             <button
+              type="button"
               className="btn btn-square btn-ghost"
-              onClick={() => setIsSidebarOpen(true)}
+              onClick={() => {
+                setIsSidebarOpen(true);
+              }}
             >
               <Menu size={24} />
             </button>
@@ -258,14 +281,19 @@ const CatatanMainLayout = () => {
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() => {
+            setIsSidebarOpen(false);
+          }}
         >
           <div
             className="fixed left-0 top-0 h-full bg-base-200 w-64 p-4 z-50 overflow-y-auto"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
             <div className="flex justify-end mb-4">
               <button
+                type="button"
                 className="btn btn-ghost"
                 onClick={() => {
                   setIsSidebarOpen(false);
@@ -307,7 +335,7 @@ const CatatanMainLayout = () => {
           type={toastAlert.type}
           message={toastAlert.message}
           onClose={closeToast}
-          duration={4000} // Durasi default
+          duration={4000}
         />
       )}
     </div>
