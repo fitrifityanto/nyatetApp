@@ -9,7 +9,7 @@ export interface Catatan {
   pinned: boolean;
   created_at?: string;
   updated_at?: string;
-  // Tambahkan properti untuk relasi kategori dan folder
+
   kategori_catatan?: {
     id: string;
     nama: string;
@@ -92,12 +92,26 @@ export interface CatatanWithDetails {
   };
 }
 
-export interface KategoriOption {
+export interface DatabaseCategory {
   id: string;
-  name: string;
+  user_id: string;
+  nama: string;
+  created_at: string;
 }
 
-export interface FolderOption {
+export interface DatabaseFolder {
   id: string;
-  name: string;
+  user_id: string;
+  nama: string;
+  created_at: string;
 }
+
+// export interface KategoriOption {
+//   id: string;
+//   name: string;
+// }
+//
+// export interface FolderOption {
+//   id: string;
+//   name: string;
+// }
