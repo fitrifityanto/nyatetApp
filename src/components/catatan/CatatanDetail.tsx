@@ -300,12 +300,7 @@ const CatatanDetail = ({ id }: Props) => {
               }
             },
             h1: ({ children }) => {
-              const childArray = React.Children.toArray(children);
-
-              // Gabungkan semua string literal (abaikan elemen React)
-              const textContent = childArray
-                .filter((child) => typeof child === "string")
-                .join("");
+              const textContent = getPlainText(children);
               const hasArabic =
                 /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
                   textContent,
