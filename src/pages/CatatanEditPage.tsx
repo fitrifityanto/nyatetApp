@@ -31,7 +31,7 @@ const CatatanEditPage: React.FC = () => {
         if (result.success && result.data) {
           setCatatan(result.data);
         } else {
-          setPageError(result.message || "Catatan tidak ditemukan");
+          setPageError(result.message ?? "Catatan tidak ditemukan");
         }
       } catch (err) {
         console.error("Error fetching catatan:", err);
@@ -41,21 +41,33 @@ const CatatanEditPage: React.FC = () => {
       }
     };
 
-    fetchCatatan();
+    void fetchCatatan();
   }, [id, getCatatanById]);
 
   const handleSuccess = () => {
+    if (!id) {
+      console.error("ID tidak ditemukan");
+      return;
+    }
     // Kembali ke halaman detail setelah berhasil edit
-    navigate(`/catatan/${id}`);
+    void navigate(`/catatan/${id}`);
   };
 
   const handleCancel = () => {
+    if (!id) {
+      console.error("ID tidak ditemukan");
+      return;
+    }
     // Kembali ke halaman detail jika dibatalkan
-    navigate(`/catatan/${id}`);
+    void navigate(`/catatan/${id}`);
   };
 
   const handleBackToDetail = () => {
-    navigate(`/catatan/${id}`);
+    if (!id) {
+      console.error("ID tidak ditemukan");
+      return;
+    }
+    void navigate(`/catatan/${id}`);
   };
 
   if (pageLoading) {
@@ -80,7 +92,8 @@ const CatatanEditPage: React.FC = () => {
           {/* Back Button */}
           <div className="mb-6">
             <button
-              onClick={() => navigate("/catatan")}
+              type="button"
+              onClick={() => void navigate("/catatan")}
               className="btn btn-ghost gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -96,17 +109,19 @@ const CatatanEditPage: React.FC = () => {
                 Catatan Tidak Ditemukan
               </h2>
               <p className="text-base-content/70 mb-6">
-                {pageError ||
+                {pageError ??
                   "Catatan yang Anda cari tidak ditemukan atau telah dihapus."}
               </p>
               <div className="flex gap-3 justify-center">
                 <button
-                  onClick={() => navigate("/catatan")}
+                  type="button"
+                  onClick={() => void navigate("/catatan")}
                   className="btn btn-primary"
                 >
                   Kembali ke Daftar Catatan
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     window.location.reload();
                   }}
@@ -127,7 +142,11 @@ const CatatanEditPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <div className="mb-6">
-          <button onClick={handleBackToDetail} className="btn btn-ghost gap-2">
+          <button
+            type="button"
+            onClick={handleBackToDetail}
+            className="btn btn-ghost gap-2"
+          >
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Detail
           </button>
