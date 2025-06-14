@@ -34,7 +34,11 @@ export default function CatatanSidebar({
   return (
     <div className="w-64 bg-base-200 p-4 min-h-screen">
       {/* Add New Button */}
-      <button onClick={onAddNew} className="btn btn-primary w-full mb-6 gap-2">
+      <button
+        type="button"
+        onClick={onAddNew}
+        className="btn btn-primary w-full mb-6 gap-2"
+      >
         <Plus size={18} />
         Tambah Catatan Baru
       </button>
@@ -48,7 +52,10 @@ export default function CatatanSidebar({
         <ul className="space-y-1">
           <li>
             <button
-              onClick={() => { onCategorySelect(null); }}
+              type="button"
+              onClick={() => {
+                onCategorySelect(null);
+              }}
               className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 ${
                 selectedCategory === null ? "bg-base-300 font-medium" : ""
               }`}
@@ -60,7 +67,10 @@ export default function CatatanSidebar({
             categories.map((category) => (
               <li key={category.id}>
                 <button
-                  onClick={() => { onCategorySelect(category.id); }}
+                  type="button"
+                  onClick={() => {
+                    onCategorySelect(category.id);
+                  }}
                   className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 flex justify-between ${
                     selectedCategory === category.id
                       ? "bg-base-300 font-medium"
@@ -89,7 +99,10 @@ export default function CatatanSidebar({
         <ul className="space-y-1">
           <li>
             <button
-              onClick={() => { onFolderSelect(null); }}
+              type="button"
+              onClick={() => {
+                onFolderSelect(null);
+              }}
               className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 ${
                 selectedFolder === null ? "bg-base-300 font-medium" : ""
               }`}
@@ -101,7 +114,10 @@ export default function CatatanSidebar({
             folders.map((folder) => (
               <li key={folder.id}>
                 <button
-                  onClick={() => { onFolderSelect(folder.id); }}
+                  type="button"
+                  onClick={() => {
+                    onFolderSelect(folder.id);
+                  }}
                   className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-base-300 flex justify-between ${
                     selectedFolder === folder.id
                       ? "bg-base-300 font-medium"

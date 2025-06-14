@@ -32,7 +32,11 @@ const AlertMessage: React.FC<AlertMessageProps> = ({
       <IconComponent className="h-5 w-5" />
       <span>{message}</span>
       {onClose && (
-        <button className="btn btn-sm btn-ghost btn-square" onClick={onClose}>
+        <button
+          type="button"
+          className="btn btn-sm btn-ghost btn-square"
+          onClick={onClose}
+        >
           <X className="h-4 w-4" />
         </button>
       )}

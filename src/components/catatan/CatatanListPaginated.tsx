@@ -114,7 +114,11 @@ const CatatanListPaginated = ({
 
       {hasMore && !loading && (
         <div className="flex justify-center pt-4">
-          <button onClick={loadMore} className="btn btn-outline btn-primary">
+          <button
+            type="button"
+            onClick={loadMore}
+            className="btn btn-outline btn-primary"
+          >
             Muat Lebih Banyak
           </button>
         </div>

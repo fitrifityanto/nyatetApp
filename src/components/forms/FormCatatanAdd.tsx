@@ -34,11 +34,14 @@ interface FormCatatanAddProps {
   }) => void; // Prop baru untuk set toast di parent
 }
 
+const EMPTY_KATEGORI_ARRAY: KategoriOption[] = [];
+const EMPTY_FOLDER_ARRAY: FolderOption[] = [];
+
 const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
   onSuccess,
   onCancel,
-  kategoris: initialKategorisFromProps = [],
-  folders: initialFoldersFromProps = [],
+  kategoris: initialKategorisFromProps = EMPTY_KATEGORI_ARRAY,
+  folders: initialFoldersFromProps = EMPTY_FOLDER_ARRAY,
   className = "",
   setParentToastAlert, // Terima prop baru
 }) => {
@@ -148,7 +151,13 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
       setNewKategoriName("");
       setShowAddKategori(false);
     }
-  }, [newKategoriName, addKategoriLocally, updateField]);
+  }, [
+    newKategoriName,
+    addKategoriLocally,
+    updateField,
+    setNewKategoriName,
+    setShowAddKategori,
+  ]);
 
   const handleAddFolder = useCallback(() => {
     if (newFolderName.trim()) {
@@ -159,17 +168,23 @@ const FormCatatanAdd: React.FC<FormCatatanAddProps> = ({
       setNewFolderName("");
       setShowAddFolder(false);
     }
-  }, [newFolderName, addFolderLocally, updateField]);
+  }, [
+    newFolderName,
+    addFolderLocally,
+    updateField,
+    setNewFolderName,
+    setShowAddFolder,
+  ]);
 
   const handleCancelAddKategori = useCallback(() => {
     setShowAddKategori(false);
     setNewKategoriName("");
-  }, []);
+  }, [setShowAddKategori, setNewKategoriName]);
 
   const handleCancelAddFolder = useCallback(() => {
     setShowAddFolder(false);
     setNewFolderName("");
-  }, []);
+  }, [setShowAddFolder, setNewFolderName]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

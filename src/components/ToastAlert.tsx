@@ -31,7 +31,9 @@ const ToastAlert: React.FC<ToastAlertProps> = ({
     }, duration);
 
     // Cleanup timer saat komponen di-unmount atau dependensi berubah
-    return () => { clearTimeout(timer); };
+    return () => {
+      clearTimeout(timer);
+    };
   }, [duration, onClose]);
 
   // Tidak merender komponen jika tidak terlihat
@@ -62,6 +64,7 @@ const ToastAlert: React.FC<ToastAlertProps> = ({
         {icons[type]} {/* Menampilkan ikon sesuai tipe */}
         <span className="flex-1">{message}</span> {/* Menampilkan pesan */}
         <button
+          type="button"
           onClick={() => {
             setIsAnimating(false); // Memulai animasi keluar saat tombol close diklik
             setTimeout(() => {
