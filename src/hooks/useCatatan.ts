@@ -1,11 +1,19 @@
 import supabase from "../lib/supabase";
 import { useCallback, useState } from "react";
-import type { CreateCatatanData, Catatan } from "../types/catatan.types";
+import type {
+  CreateCatatanData,
+  Catatan,
+  DatabaseCategory,
+  DatabaseFolder,
+} from "../types/catatan.types";
 
 interface SelectedId {
   id: string;
 }
-// Default values, dipindahkan ke sini karena logikanya akan terpusat di sini untuk DB interaction
+
+type MinimalCategory = Pick<DatabaseCategory, "id" | "nama">;
+type MinimalFolder = Pick<DatabaseFolder, "id" | "nama">;
+
 export const DEFAULT_KATEGORI_NAMA = "Tanpa Kategori";
 export const DEFAULT_FOLDER_NAMA = "Dokumen";
 
@@ -117,8 +125,7 @@ export const useCatatan = () => {
       if (!userId) {
         throw new Error("User not authenticated.");
       }
-
-      const { data, error: fetchError } = await supabase
+      const result = await supabase
         .from("catatan")
         .select(
           `
@@ -137,6 +144,28 @@ export const useCatatan = () => {
         .eq("user_id", userId)
         .single();
 
+      const data = result.data ? (result.data as Catatan) : null;
+
+      const fetchError = result.error;
+      // const { data, error: fetchError } = await supabase
+      //   .from("catatan")
+      //   .select(
+      //     `
+      //     *,
+      //     kategori_catatan:kategori_id (
+      //       id,
+      //       nama
+      //     ),
+      //     folder_catatan:folder_id (
+      //       id,
+      //       nama
+      //     )
+      //   `,
+      //   )
+      //   .eq("id", catatanId)
+      //   .eq("user_id", userId)
+      //   .single();
+
       if (fetchError) {
         if (fetchError.code === "PGRST116") {
           throw new Error(
@@ -151,23 +180,23 @@ export const useCatatan = () => {
       }
 
       // Transform data to match Catatan interface
-      const catatan: Catatan = {
-        ...data,
-        kategori_catatan: data.kategori_catatan
-          ? {
-              id: data.kategori_catatan.id,
-              nama: data.kategori_catatan.nama,
-            }
-          : undefined,
-        folder_catatan: data.folder_catatan
-          ? {
-              id: data.folder_catatan.id,
-              nama: data.folder_catatan.nama,
-            }
-          : undefined,
-      };
+      // const catatan: Catatan = {
+      //   ...data,
+      //   kategori_catatan: data.kategori_catatan
+      //     ? {
+      //         id: data.kategori_catatan.id,
+      //         nama: data.kategori_catatan.nama,
+      //       }
+      //     : undefined,
+      //   folder_catatan: data.folder_catatan
+      //     ? {
+      //         id: data.folder_catatan.id,
+      //         nama: data.folder_catatan.nama,
+      //       }
+      //     : undefined,
+      // };
 
-      return { success: true, data: catatan, message: null };
+      return { success: true, data, message: null };
     } catch (err) {
       console.error("Error fetching catatan by ID:", err);
       const errorMessage =
@@ -332,7 +361,9 @@ export const useCatatan = () => {
 
       if (error) throw error;
 
-      return data.map((item) => ({ id: item.id, name: item.nama }));
+      const kategoris = data as MinimalCategory[];
+
+      return kategoris.map((item) => ({ id: item.id, name: item.nama }));
     } catch (err) {
       console.error("Error fetching kategoris:", err);
       return [];
@@ -353,7 +384,9 @@ export const useCatatan = () => {
 
       if (error) throw error;
 
-      return data.map((item) => ({ id: item.id, name: item.nama }));
+      const folders = data as MinimalFolder[];
+
+      return folders.map((item) => ({ id: item.id, name: item.nama }));
     } catch (err) {
       console.error("Error fetching folders:", err);
       return [];
