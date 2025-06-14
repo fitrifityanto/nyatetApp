@@ -26,14 +26,14 @@ export const useFormCatatan = (initialData?: Partial<CreateCatatanData>) => {
     const storedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
     if (storedDraft) {
       try {
-        const draft = JSON.parse(storedDraft);
+        const draft = JSON.parse(storedDraft) as Partial<FormDataWithNames>;
         return {
-          judul_catatan: draft.judul_catatan || "",
-          isi_catatan: draft.isi_catatan || "",
-          kategori_nama: draft.kategori_nama || DEFAULT_KATEGORI_NAMA,
-          folder_nama: draft.folder_nama || DEFAULT_FOLDER_NAMA,
-          is_archived: draft.is_archived || false,
-          pinned: draft.pinned || false,
+          judul_catatan: draft.judul_catatan ?? "",
+          isi_catatan: draft.isi_catatan ?? "",
+          kategori_nama: draft.kategori_nama ?? DEFAULT_KATEGORI_NAMA,
+          folder_nama: draft.folder_nama ?? DEFAULT_FOLDER_NAMA,
+          is_archived: draft.is_archived ?? false,
+          pinned: draft.pinned ?? false,
         };
       } catch (e) {
         console.error("Failed to parse draft from localStorage:", e);
@@ -41,12 +41,12 @@ export const useFormCatatan = (initialData?: Partial<CreateCatatanData>) => {
       }
     }
     return {
-      judul_catatan: initialData?.judul_catatan || "",
-      isi_catatan: initialData?.isi_catatan || "",
-      kategori_nama: initialData?.kategori_nama || DEFAULT_KATEGORI_NAMA,
-      folder_nama: initialData?.folder_nama || DEFAULT_FOLDER_NAMA,
-      is_archived: initialData?.is_archived || false,
-      pinned: initialData?.pinned || false,
+      judul_catatan: initialData?.judul_catatan ?? "",
+      isi_catatan: initialData?.isi_catatan ?? "",
+      kategori_nama: initialData?.kategori_nama ?? DEFAULT_KATEGORI_NAMA,
+      folder_nama: initialData?.folder_nama ?? DEFAULT_FOLDER_NAMA,
+      is_archived: initialData?.is_archived ?? false,
+      pinned: initialData?.pinned ?? false,
     };
   });
 
@@ -117,14 +117,14 @@ export const useFormCatatan = (initialData?: Partial<CreateCatatanData>) => {
     const storedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
     if (storedDraft) {
       try {
-        const draft = JSON.parse(storedDraft);
+        const draft = JSON.parse(storedDraft) as Partial<FormDataWithNames>;
         setFormData({
-          judul_catatan: draft.judul_catatan || "",
-          isi_catatan: draft.isi_catatan || "",
-          kategori_nama: draft.kategori_nama || DEFAULT_KATEGORI_NAMA,
-          folder_nama: draft.folder_nama || DEFAULT_FOLDER_NAMA,
-          is_archived: draft.is_archived || false,
-          pinned: draft.pinned || false,
+          judul_catatan: draft.judul_catatan ?? "",
+          isi_catatan: draft.isi_catatan ?? "",
+          kategori_nama: draft.kategori_nama ?? DEFAULT_KATEGORI_NAMA,
+          folder_nama: draft.folder_nama ?? DEFAULT_FOLDER_NAMA,
+          is_archived: draft.is_archived ?? false,
+          pinned: draft.pinned ?? false,
         });
         setIsDirty(false); // Loaded draft is not dirty initially
         return true;
