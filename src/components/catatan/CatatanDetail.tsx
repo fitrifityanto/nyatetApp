@@ -169,6 +169,7 @@ const CatatanDetail = ({ id }: Props) => {
 
       <nav className="space-y-2">
         <button
+          type="button"
           onClick={handleBack}
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
         >
@@ -204,6 +205,7 @@ const CatatanDetail = ({ id }: Props) => {
 
         <div className="hidden lg:flex items-center gap-2">
           <button
+            type="button"
             onClick={handleEdit}
             className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
             title="Edit Catatan"
@@ -212,6 +214,7 @@ const CatatanDetail = ({ id }: Props) => {
             Edit
           </button>
           <button
+            type="button"
             onClick={confirmDelete}
             className="flex items-center gap-2 px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
             title="Hapus Catatan"
@@ -447,6 +450,7 @@ const CatatanDetail = ({ id }: Props) => {
       {/* Floating Action Buttons - Mobile/Tablet only */}
       <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3 z-40">
         <button
+          type="button"
           onClick={handleEdit}
           className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
           title="Edit Catatan"
@@ -454,6 +458,7 @@ const CatatanDetail = ({ id }: Props) => {
           <Edit className="w-5 h-5" />
         </button>
         <button
+          type="button"
           onClick={confirmDelete}
           className="w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
           title="Hapus Catatan"
@@ -474,6 +479,7 @@ const CatatanDetail = ({ id }: Props) => {
             </p>
             <div className="flex justify-end gap-3">
               <button
+                type="button"
                 onClick={() => {
                   setShowDeleteModal(false);
                 }}
@@ -482,6 +488,7 @@ const CatatanDetail = ({ id }: Props) => {
                 Batal
               </button>
               <button
+                type="button"
                 onClick={() => void handleDelete()}
                 className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
               >
