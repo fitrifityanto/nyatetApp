@@ -35,7 +35,11 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-base-100 shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Register</h2>
-      <form onSubmit={(e) => void handleRegister(e)} className="space-y-4">
+      <form
+        role="form"
+        onSubmit={(e) => void handleRegister(e)}
+        className="space-y-4"
+      >
         <label className="form-control w-full">
           <div className="label">
             <span className="label-text">Full Name</span>

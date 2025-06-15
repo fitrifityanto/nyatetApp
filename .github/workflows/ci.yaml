@@ -3,10 +3,10 @@ name: CI for nyatetApp
 on:
   push:
     branches:
-      - ci
+      - main
   pull_request:
     branches:
-      - ci
+      - main
 
 jobs:
   build-and-test:
@@ -30,7 +30,7 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm test
+        run: npm run test
 
       - name: Build project
         run: npm run build
