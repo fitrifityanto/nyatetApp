@@ -157,7 +157,7 @@ const CatatanDetail = ({ id }: Props) => {
     return <p className="text-center text-error">Catatan not found.</p>;
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto w-full">
+    <div className="p-3 space-y-6 max-w-4xl mx-auto w-full">
       {toast.show && (
         <ToastAlert
           type={toast.type}
