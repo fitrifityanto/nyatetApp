@@ -267,7 +267,7 @@ const CatatanMainLayout = () => {
           </div>
         </div>
 
-        <main className="flex-1 p-4 overflow-y-auto">
+        <main className="flex-1 p-3 overflow-y-auto">
           <h1 className="text-3xl font-bold mb-6">Daftar Catatan</h1>
           <CatatanListPaginated
             selectedCategory={selectedCategory}
@@ -286,7 +286,7 @@ const CatatanMainLayout = () => {
           }}
         >
           <div
-            className="fixed left-0 top-0 h-full bg-base-200 w-64 p-4 z-50 overflow-y-auto"
+            className="fixed left-0 top-0 h-full bg-base-200 p-4 z-50 overflow-y-auto"
             onClick={(e) => {
               e.stopPropagation();
             }}
