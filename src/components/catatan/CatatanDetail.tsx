@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import ReactMarkdown from "react-markdown";
 import {
@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import supabase from "../../lib/supabase";
 import ToastAlert from "../ToastAlert";
+
+import { getPlainText } from "../../utils/markdown";
+import CustomParagraph from "../markdown/CustomParagraph";
+import CustomHeading from "../markdown/CustomHeading";
 
 interface Props {
   id: string;
@@ -37,25 +41,6 @@ interface ToastType {
   message: string;
   show: boolean;
 }
-
-const getPlainText = (node: React.ReactNode): string => {
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node);
-  }
-  if (Array.isArray(node)) {
-    return node.map(getPlainText).join("");
-  }
-  // Periksa elemen React (misalnya <em>, <strong>)
-  if (React.isValidElement(node)) {
-    // Type assertion: Memberi tahu TypeScript bahwa props elemen ini mungkin memiliki properti children.
-    const elementProps = node.props as { children?: React.ReactNode };
-
-    if (elementProps.children !== undefined) {
-      return getPlainText(elementProps.children);
-    }
-  }
-  return ""; // Abaikan tipe lain (boolean, null, undefined) atau elemen tanpa children
-};
 
 const CatatanDetail = ({ id }: Props) => {
   const [catatan, setCatatan] = useState<Catatan | null>(null);
@@ -259,94 +244,17 @@ const CatatanDetail = ({ id }: Props) => {
       <article className="prose prose-lg dark:prose-invert max-w-none">
         <ReactMarkdown
           components={{
-            p: ({ children }) => {
-              const textContent = getPlainText(children);
+            p: CustomParagraph,
 
-              const hasArabic =
-                /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
-                  textContent,
-                );
-              const hasLatin = /[A-Za-z]/.test(textContent);
-
-              if (hasArabic && !hasLatin) {
-                return (
-                  <p
-                    className="font-arabic mb-4 leading-relaxed text-gray-800 dark:text-gray-200 text-right"
-                    dir="rtl"
-                  >
-                    {children}
-                  </p>
-                );
-              } else if (hasArabic && hasLatin) {
-                return (
-                  <p
-                    className="mb-4 leading-relaxed text-gray-800 dark:text-gray-200 text-left"
-                    dir="ltr"
-                  >
-                    <span
-                      className="font-arabic inline-block w-full text-right"
-                      dir="rtl"
-                    >
-                      {children}
-                    </span>
-                  </p>
-                );
-              } else {
-                return (
-                  <p className="mb-4 leading-relaxed text-gray-800 dark:text-gray-200">
-                    {children}
-                  </p>
-                );
-              }
-            },
-            h1: ({ children }) => {
-              const textContent = getPlainText(children);
-              const hasArabic =
-                /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
-                  textContent,
-                );
-
-              return (
-                <h1
-                  className={`text-2xl font-bold mb-4 mt-8 first:mt-0 text-gray-900 dark:text-gray-100 ${hasArabic ? "font-arabic text-right" : ""}`}
-                  dir={hasArabic ? "rtl" : "ltr"}
-                >
-                  {children}
-                </h1>
-              );
-            },
-            h2: ({ children }) => {
-              const textContent = getPlainText(children);
-              const hasArabic =
-                /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
-                  textContent,
-                );
-
-              return (
-                <h2
-                  className={`text-xl font-semibold mb-3 mt-6 first:mt-0 text-gray-900 dark:text-gray-100 ${hasArabic ? "font-arabic text-right" : ""}`}
-                  dir={hasArabic ? "rtl" : "ltr"}
-                >
-                  {children}
-                </h2>
-              );
-            },
-            h3: ({ children }) => {
-              const textContent = getPlainText(children);
-              const hasArabic =
-                /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
-                  textContent,
-                );
-
-              return (
-                <h3
-                  className={`text-lg font-medium mb-2 mt-5 first:mt-0 text-gray-900 dark:text-gray-100 ${hasArabic ? "font-arabic text-right" : ""}`}
-                  dir={hasArabic ? "rtl" : "ltr"}
-                >
-                  {children}
-                </h3>
-              );
-            },
+            h1: ({ children }) => (
+              <CustomHeading level={1}>{children}</CustomHeading>
+            ),
+            h2: ({ children }) => (
+              <CustomHeading level={2}>{children}</CustomHeading>
+            ),
+            h3: ({ children }) => (
+              <CustomHeading level={3}>{children}</CustomHeading>
+            ),
             ul: ({ children }) => (
               <ul className="list-disc list-inside mb-4 space-y-2 text-gray-800 dark:text-gray-200 ml-4">
                 {children}
