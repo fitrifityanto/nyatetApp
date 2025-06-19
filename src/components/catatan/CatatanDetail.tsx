@@ -17,9 +17,9 @@ import {
 import supabase from "../../lib/supabase";
 import ToastAlert from "../ToastAlert";
 
-import { getPlainText } from "../../utils/markdown";
 import CustomParagraph from "../markdown/CustomParagraph";
 import CustomHeading from "../markdown/CustomHeading";
+import CustomBlockquote from "../markdown/CustomBlockquote";
 
 interface Props {
   id: string;
@@ -268,22 +268,7 @@ const CatatanDetail = ({ id }: Props) => {
             li: ({ children }) => (
               <li className="leading-relaxed">{children}</li>
             ),
-            blockquote: ({ children }) => {
-              const textContent = getPlainText(children);
-              const hasArabic =
-                /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
-                  textContent,
-                );
-
-              return (
-                <blockquote
-                  className={`border-l-4 border-gray-300 dark:border-gray-600 pl-6 my-6 text-gray-700 dark:text-gray-300 italic ${hasArabic ? "font-arabic text-right border-r-4 border-l-0 pr-6 pl-0" : ""}`}
-                  dir={hasArabic ? "rtl" : "ltr"}
-                >
-                  {children}
-                </blockquote>
-              );
-            },
+            blockquote: CustomBlockquote,
             code: ({ children, className }) => {
               const isInline = !className;
               if (isInline) {
