@@ -1,5 +1,5 @@
 import React, { type JSX } from "react";
-import { getPlainText } from "../../utils/markdown";
+import { getPlainText } from "@/utils/markdown";
 
 interface CustomHeadingProps {
   children: React.ReactNode;
@@ -32,4 +32,3 @@ const CustomHeading = ({ children, level }: CustomHeadingProps) => {
 };
 
 export default CustomHeading;
-

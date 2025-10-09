@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"; // Import useCallback
+import { useState, useEffect, useCallback } from "react";
 
 interface UsePaginationProps<T> {
   data: T[];

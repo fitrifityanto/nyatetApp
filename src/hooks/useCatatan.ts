@@ -1,11 +1,11 @@
-import supabase from "../lib/supabase";
+import supabase from "@/lib/supabase";
 import { useCallback, useState } from "react";
 import type {
   CreateCatatanData,
   Catatan,
   DatabaseCategory,
   DatabaseFolder,
-} from "../types/catatan.types";
+} from "@/types/catatan.types";
 
 interface SelectedId {
   id: string;

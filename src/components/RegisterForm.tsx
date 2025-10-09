@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { RegisterCredentials } from "../lib/auth";
+import type { RegisterCredentials } from "@/lib/auth";
 
 interface RegisterFormProps {
   onRegister: (credentials: RegisterCredentials) => Promise<void>;

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 
 import CatatanList from "./CatatanList";
-import { usePagination } from "../../hooks/usePagination";
-import supabase from "../../lib/supabase";
-import type { CatatanWithDetails } from "../../types/catatan.types";
+import { usePagination } from "@/hooks/usePagination";
+import supabase from "@/lib/supabase";
+import type { CatatanWithDetails } from "@/types/catatan.types";
 
 interface CatatanListPaginatedProps {
   selectedCategory: string | null;

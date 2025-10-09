@@ -1,5 +1,5 @@
-import RegisterForm from "../components/RegisterForm";
-import { useAuth } from "../hooks/useAuth";
+import RegisterForm from "@/components/RegisterForm";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RegisterPage() {
   const { register } = useAuth();

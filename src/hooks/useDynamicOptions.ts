@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { FolderOption, KategoriOption } from "../types/catatan.types";
+import type { FolderOption, KategoriOption } from "@/types/catatan.types";
 
 interface UseDynamicOptionsProps {
   initialKategoris: KategoriOption[];

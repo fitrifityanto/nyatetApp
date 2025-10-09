@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { LoginCredentials } from "../lib/auth";
+import type { LoginCredentials } from "@/lib/auth";
 
 interface LoginFormProps {
   onLogin?: (credentials: LoginCredentials) => Promise<void>;
@@ -48,7 +48,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             placeholder="email@example.com"
             className="input input-bordered w-full"
             value={email}
-            onChange={(e) => { setEmail(e.target.value); }}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
             required
           />
         </label>
@@ -61,7 +63,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             placeholder="********"
             className="input input-bordered w-full"
             value={password}
-            onChange={(e) => { setPassword(e.target.value); }}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
             required
           />
         </label>

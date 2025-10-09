@@ -14,7 +14,7 @@ import {
   Trash2,
   ChevronRight,
 } from "lucide-react";
-import supabase from "../../lib/supabase";
+import supabase from "@/lib/supabase";
 import ToastAlert from "../ToastAlert";
 
 import CustomParagraph from "../markdown/CustomParagraph";

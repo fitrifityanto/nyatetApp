@@ -1,15 +1,13 @@
-
 import React from "react";
-import { getPlainText } from "../../utils/markdown";
+import { getPlainText } from "@/utils/markdown";
 
-
-interface CustomBlockquoteProps extends React.BlockquoteHTMLAttributes<HTMLQuoteElement> {
-  children?: React.ReactNode; 
+interface CustomBlockquoteProps
+  extends React.BlockquoteHTMLAttributes<HTMLQuoteElement> {
+  children?: React.ReactNode;
 }
 
 const CustomBlockquote = ({ children, ...props }: CustomBlockquoteProps) => {
- 
-  const textContent = getPlainText(children) || ''; 
+  const textContent = getPlainText(children) || "";
   const hasArabic =
     /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
       textContent,
@@ -30,7 +28,7 @@ const CustomBlockquote = ({ children, ...props }: CustomBlockquoteProps) => {
           /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
             part,
           );
-        
+
         const uniqueKey = `${part}-${i.toString()}-${index.toString()}`;
         return isArabic ? (
           <span key={uniqueKey} dir="rtl" className="font-arabic">
@@ -78,7 +76,7 @@ const CustomBlockquote = ({ children, ...props }: CustomBlockquoteProps) => {
     direction = "rtl";
     return (
       <blockquote className={finalClasses} dir={direction} {...props}>
-        {children} 
+        {children}
       </blockquote>
     );
   }
@@ -92,3 +90,4 @@ const CustomBlockquote = ({ children, ...props }: CustomBlockquoteProps) => {
 };
 
 export default CustomBlockquote;
+
