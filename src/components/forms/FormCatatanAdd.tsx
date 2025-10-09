@@ -14,10 +14,10 @@ import {
   Check,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { FolderOption, KategoriOption } from "../../types/catatan.types";
-import { useCatatan } from "../../hooks/useCatatan";
-import { useFormCatatan } from "../../hooks/useFormCatatan";
-import { useDynamicOptions } from "../../hooks/useDynamicOptions";
+import type { FolderOption, KategoriOption } from "@/types/catatan.types";
+import { useCatatan } from "@/hooks/useCatatan";
+import { useFormCatatan } from "@/hooks/useFormCatatan";
+import { useDynamicOptions } from "@/hooks/useDynamicOptions";
 import FieldError from "../FieldError";
 import ToastAlert from "../ToastAlert";
 

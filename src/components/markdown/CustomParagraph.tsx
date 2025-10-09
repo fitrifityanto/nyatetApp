@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getPlainText } from "../../utils/markdown";
+import { getPlainText } from "@/utils/markdown";
 
 const CustomParagraph = ({
   children,
@@ -86,4 +86,3 @@ const CustomParagraph = ({
 };
 
 export default CustomParagraph;
-

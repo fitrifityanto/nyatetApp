@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import CatatanDetail from "../components/catatan/CatatanDetail";
+import CatatanDetail from "@/components/catatan/CatatanDetail";
 
 const CatatanDetailPage = () => {
   const { id } = useParams();

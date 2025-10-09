@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { CreateCatatanData } from "../types/catatan.types";
+import type { CreateCatatanData } from "@/types/catatan.types";
 import { DEFAULT_KATEGORI_NAMA, DEFAULT_FOLDER_NAMA } from "./useCatatan";
 
 interface FormErrors {

@@ -18,10 +18,10 @@ import type {
   FolderOption,
   KategoriOption,
   Catatan,
-} from "../../types/catatan.types";
-import { useCatatan } from "../../hooks/useCatatan";
-import { useFormCatatan } from "../../hooks/useFormCatatan";
-import { useDynamicOptions } from "../../hooks/useDynamicOptions";
+} from "@/types/catatan.types";
+import { useCatatan } from "@/hooks/useCatatan";
+import { useFormCatatan } from "@/hooks/useFormCatatan";
+import { useDynamicOptions } from "@/hooks/useDynamicOptions";
 import FieldError from "../FieldError";
 import ToastAlert from "../ToastAlert";
 

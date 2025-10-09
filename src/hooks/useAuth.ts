@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
-import supabase from "../lib/supabase";
-import { login, register, logout } from "../lib/auth";
-import type { LoginCredentials, RegisterCredentials } from "../lib/auth";
+import supabase from "@/lib/supabase";
+import { login, register, logout } from "@/lib/auth";
+import type { LoginCredentials, RegisterCredentials } from "@/lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);

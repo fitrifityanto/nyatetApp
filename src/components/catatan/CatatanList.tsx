@@ -1,5 +1,5 @@
 import CatatanItem from "./CatatanItem";
-import type { CatatanWithDetails } from "../../types/catatan.types";
+import type { CatatanWithDetails } from "@/types/catatan.types";
 
 interface CatatanListProps {
   catatan: CatatanWithDetails[];

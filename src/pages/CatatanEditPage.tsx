@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
-import FormCatatanEdit from "../components/forms/FormCatatanEdit";
-import { useCatatan } from "../hooks/useCatatan";
-import type { Catatan } from "../types/catatan.types";
+import FormCatatanEdit from "@/components/forms/FormCatatanEdit";
+import { useCatatan } from "@/hooks/useCatatan";
+import type { Catatan } from "@/types/catatan.types";
 
 const CatatanEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

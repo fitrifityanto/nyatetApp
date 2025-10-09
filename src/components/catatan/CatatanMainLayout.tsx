@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import CatatanSidebar from "./CatatanSidebar";
 import CatatanListPaginated from "./CatatanListPaginated";
 import FormCatatanAdd from "../forms/FormCatatanAdd";
-import supabase from "../../lib/supabase";
+import supabase from "@/lib/supabase";
 import { Menu, X } from "lucide-react";
 import ToastAlert from "../ToastAlert";
 
