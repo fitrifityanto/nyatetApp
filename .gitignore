@@ -30,3 +30,12 @@ dist-ssr
 
 # Vite cache
 .vite/
+
+# Virtual environment
+.venv/
+venv/
+
+# MCPhub local config
+.mcp/
+.mcphub/
+.env.mcp.local
