@@ -15,11 +15,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import supabase from "@/lib/supabase";
-import ToastAlert from "../ToastAlert";
+import ToastAlert from "@/components/ui/ToastAlert";
 
-import CustomParagraph from "../markdown/CustomParagraph";
-import CustomHeading from "../markdown/CustomHeading";
-import CustomBlockquote from "../markdown/CustomBlockquote";
+import CustomParagraph from "@/components/markdown/CustomParagraph";
+import CustomHeading from "@/components/markdown/CustomHeading";
+import CustomBlockquote from "@/components/markdown/CustomBlockquote";
 
 interface Props {
   id: string;
