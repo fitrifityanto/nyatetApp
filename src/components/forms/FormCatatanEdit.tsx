@@ -22,8 +22,8 @@ import type {
 import { useCatatan } from "@/hooks/useCatatan";
 import { useFormCatatan } from "@/hooks/useFormCatatan";
 import { useDynamicOptions } from "@/hooks/useDynamicOptions";
-import FieldError from "../FieldError";
-import ToastAlert from "../ToastAlert";
+import FieldError from "@/components/FieldError";
+import ToastAlert from "@/components/ui/ToastAlert";
 
 interface FormCatatanEditProps {
   catatan: Catatan;
