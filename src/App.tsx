@@ -1,16 +1,19 @@
+import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router";
 import "./App.css";
 import { useAuth } from "./hooks/useAuth";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
-import HomePage from "./pages/HomePage";
-import DashboardPage from "./pages/DashboardPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import CatatanPage from "./pages/CatatanPage";
-import CatatanDetailPage from "./pages/CatatanDetailPage";
-import CatatanEditPage from "./pages/CatatanEditPage";
+
+// 🔹 Lazy import untuk setiap halaman
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const CatatanPage = lazy(() => import("./pages/CatatanPage"));
+const CatatanDetailPage = lazy(() => import("./pages/CatatanDetailPage"));
+const CatatanEditPage = lazy(() => import("./pages/CatatanEditPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function App() {
   const { loading } = useAuth();
@@ -22,8 +25,16 @@ function App() {
       </div>
     );
   }
+
   return (
-    <>
+    // 🔹 Suspense menangani fallback saat halaman sedang dimuat
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      }
+    >
       <Routes>
         <Route path="/" element={<HomePage />} />
 
@@ -78,10 +89,7 @@ function App() {
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-
-      {/* <LoginPage /> */}
-      {/* <RegisterPage /> */}
-    </>
+    </Suspense>
   );
 }
 
