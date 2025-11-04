@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import CatatanSidebar from "./CatatanSidebar";
-import CatatanListPaginated from "./CatatanListPaginated";
-import FormCatatanAdd from "../forms/FormCatatanAdd";
+import CatatanSidebar from "@/components/catatan/CatatanSidebar";
+import CatatanListPaginated from "@/components/catatan/CatatanListPaginated";
+import FormCatatanAdd from "@/components/forms/FormCatatanAdd";
 import supabase from "@/lib/supabase";
 import { Menu, X } from "lucide-react";
-import ToastAlert from "../ToastAlert";
+import ToastAlert from "@/components/ui/ToastAlert";
 
 interface Category {
   id: string;
